@@ -21,26 +21,31 @@ import _root_.android.view.View
 /** The EnhancedViews trait adds an implicit conversion that makes working with
   * Views a bit easier.
   *
-  * @author Daniel Solano Gómez
-  *
-  * @see EnhancedView */
+  * @author Daniel Solano Gómez */
 trait EnhancedViews {
   implicit def viewToEnhancedView(view: View) =
-    new EnhancedView(view)
+    new EnhancedViews.EnhancedView(view)
 }
 
 
-/** The EnhancedView class decorates the View class by adding a number of
-  * methods that make it easier to work with views.
+/** The companion object to the EnhancedViews trait.  This allows declaration
+  *  of the EnhancedView class without an implicit reference to an instance
+  *  of a class that has the EnhancedViews trait.
   *
   * @author Daniel Solano Gómez */
-class EnhancedView(view: View) {
-  /** Sets the OnClickListener for the View to the given anonymous function. */
-  def onClick(f: View => Unit) {
-    view.setOnClickListener(new View.OnClickListener {
-      override def onClick(v: View) {
-        f(v)
-      }
-    })
+object EnhancedViews extends EnhancedViews {
+  /** The EnhancedView class decorates the View class by adding a number of
+    * methods that make it easier to work with views.
+    *
+    * @author Daniel Solano Gómez */
+  protected class EnhancedView(view: View) {
+    /** Sets the OnClickListener for the View to the given anonymous function. */
+    def onClick(f: View => Unit) {
+      view.setOnClickListener(new View.OnClickListener {
+        override def onClick(v: View) {
+          f(v)
+        }
+      })
+    }
   }
 }

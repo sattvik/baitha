@@ -16,40 +16,43 @@
  */
 package com.sattvik.baitha.test
 
-import org.scalatest.WordSpec
-import org.mockito.Mockito._
 import android.view.View
-import org.mockito.Matchers.any
+import org.mockito.Matchers._
+import org.mockito.Mockito._
 import org.scalatest.matchers.ShouldMatchers
-import com.sattvik.baitha.{EnhancedViews, EnhancedView}
+import org.scalatest.{OneInstancePerTest, WordSpec}
+import com.sattvik.baitha.EnhancedViews
 
-class EnhancedViewsSuite extends WordSpec with ShouldMatchers {
-  "An ExtendedView" should {
-    "provide an onClick method" in {
-      // view to mock
-      val mockedView = mock(classOf[View])
+class EnhancedViewsSuite
+    extends WordSpec with ShouldMatchers with OneInstancePerTest {
+  val mockedView = mock(classOf[View])
 
-      // set the listener using the onClick method
-      val enhancedView = new EnhancedView(mockedView)
-      enhancedView onClick {_ =>}
-
-      // verify the listener was set
-      verify(mockedView).setOnClickListener(any(classOf[View.OnClickListener]))
-    }
-  }
-
-  "The ExtendedViews trait" should {
-    "provide implicit conversions" in {
-      val mockedView = mock(classOf[View])
-      val traitTester = new EnhancedViews {
-        def test(v: View) {
-          v onClick {_ =>}
+  "ExtendedViews" when {
+    "as a Trait" should {
+      "provide an onClick method" in {
+        val traitTester = new
+                EnhancedViews {
+          def test(v: View) {
+            v onClick {_ =>}
+          }
         }
+
+        traitTester test mockedView
+
+        verify(mockedView)
+            .setOnClickListener(any(classOf[View.OnClickListener]))
       }
+    }
+    "as an object" should {
+      import com.sattvik.baitha.EnhancedViews._
 
-      traitTester test mockedView
+      "provide an onClick function" in {
+        val mockedView = mock(classOf[View])
+        mockedView onClick {_ =>}
 
-      verify(mockedView).setOnClickListener(any(classOf[View.OnClickListener]))
+        verify(mockedView)
+            .setOnClickListener(any(classOf[View.OnClickListener]))
+      }
     }
   }
 }
