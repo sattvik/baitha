@@ -17,14 +17,21 @@
 package com.sattvik.baitha
 
 import _root_.android.view.View
+import android.widget.RadioGroup
+import java.lang.Boolean
 
 /** The EnhancedViews trait adds an implicit conversion that makes working with
   * Views a bit easier.
   *
   * @author Daniel Solano Gómez */
 trait EnhancedViews {
-  implicit def viewToEnhancedView(view: View) =
-    new EnhancedViews.EnhancedView(view)
+
+  import EnhancedViews._
+
+  implicit def viewToEnhancedView(view: View) = new EnhancedView(view)
+
+  implicit def radioGroupToEnhancedRadioGroup(radioGroup: RadioGroup) =
+    new EnhancedRadioGroup(radioGroup)
 }
 
 
@@ -46,6 +53,14 @@ object EnhancedViews extends EnhancedViews {
           f(v)
         }
       })
+    }
+  }
+
+  protected class EnhancedRadioGroup(radioGroup: RadioGroup) {
+    def setChildrenEnabled(enabled: scala.Boolean) {
+      for(i <- 0 until radioGroup.getChildCount) {
+        radioGroup.getChildAt(i).setEnabled(enabled)
+      }
     }
   }
 }

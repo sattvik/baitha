@@ -19,40 +19,81 @@ package com.sattvik.baitha.test
 import android.view.View
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{OneInstancePerTest, WordSpec}
 import com.sattvik.baitha.EnhancedViews
+import android.widget.{RadioButton, RadioGroup}
+import org.scalatest.{Suite, OneInstancePerTest}
 
-class EnhancedViewsSuite
-    extends WordSpec with ShouldMatchers with OneInstancePerTest {
-  val mockedView = mock(classOf[View])
+/** Defines the tests for the EnhancedViews trait and companion object.
+  *
+  * @author Daniel Solano Gómez */
+abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest {
+  private val mockedView = mock(classOf[View])
 
-  "ExtendedViews" when {
-    "as a Trait" should {
-      "provide an onClick method" in {
-        val traitTester = new
-                EnhancedViews {
-          def test(v: View) {
-            v onClick {_ =>}
-          }
-        }
+  /** Tests that views can have an enhanced onClick method. */
+  final def testOnClick() {
+    doOnClick(mockedView)
 
-        traitTester test mockedView
+    verify(mockedView).setOnClickListener(any(classOf[View.OnClickListener]))
+  }
 
-        verify(mockedView)
-            .setOnClickListener(any(classOf[View.OnClickListener]))
+  /** Allow each implementation to actually do the onClick */
+  def doOnClick(view: View)
+
+  /** Tests that the setChildrenEnabled method works. */
+  def testSetChildrenEnabled() {
+    def performTest(numChildren: Int, enabled: scala.Boolean) {
+      def newMockRadioButton = mock(classOf[RadioButton])
+      val group = mock(classOf[RadioGroup])
+      val buttons = Array.fill(numChildren)(newMockRadioButton)
+
+      // mock the calls to the radio group
+      when(group.getChildCount).thenReturn(numChildren)
+      for (i <- 0 until numChildren) {
+        when(group.getChildAt(i)).thenReturn(buttons(i))
+      }
+
+      doSetChildrenEnabled(group, enabled)
+
+      buttons foreach {
+        verify(_).setEnabled(enabled)
       }
     }
-    "as an object" should {
-      import com.sattvik.baitha.EnhancedViews._
 
-      "provide an onClick function" in {
-        val mockedView = mock(classOf[View])
-        mockedView onClick {_ =>}
+    performTest(6, true)
+    performTest(101, false)
+    performTest(1, true)
+    performTest(0, false)
+  }
 
-        verify(mockedView)
-            .setOnClickListener(any(classOf[View.OnClickListener]))
-      }
-    }
+  /** Actually performs the setChildrenEnabled call. */
+  def doSetChildrenEnabled(radioGroup: RadioGroup, enabled: scala.Boolean)
+}
+
+/** Tests the EnhancedViews companion object.
+  *
+  * @author Daniel Solano Gómez */
+class EnhancedViewsObjectSuite extends EnhancedViewsSuite {
+
+  import com.sattvik.baitha.EnhancedViews._
+
+  def doOnClick(view: View) {
+    view onClick {_ =>}
+  }
+
+  def doSetChildrenEnabled(radioGroup: RadioGroup, enabled: scala.Boolean) {
+    radioGroup.setChildrenEnabled(enabled)
+  }
+}
+
+/** Tests the EnhancedViews trait.
+  *
+  * @author Daniel Solano Gómez */
+class EnhancedViewsTraitSuite extends EnhancedViewsSuite with EnhancedViews {
+  def doOnClick(view: View) {
+    view onClick {_ =>}
+  }
+
+  def doSetChildrenEnabled(radioGroup: RadioGroup, enabled: scala.Boolean) {
+    radioGroup.setChildrenEnabled(enabled)
   }
 }
