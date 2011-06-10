@@ -14,36 +14,40 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.sattvik.baitha
+package com.sattvik.baitha.test
 
-/** Trait for conditionally executing code based on a debug flag.
+import com.sattvik.baitha._
+import org.scalatest.Suite
+
+/** Defines the tests for the BuildMode traits.
   *
   * @author Daniel Solano Gómez */
-trait DebugMode {
-  /** Executes argument only if debugging is enabled.
-    *
-    * For example:
-    * {{{
-    * withDebug {
-    *   // do something when debug is enabled
-    * }
-    * }}} */
-  protected def whenDebug(body: => Unit)
+abstract class BuildModeSuite extends Suite with BuildMode {
+  protected def isDebugEnabled = {
+    var enabled = false
+    whenDebug {
+      enabled = true
+    }
+    enabled
+  }
+
+  def testWhenDebug()
 }
 
-/** Debug version of DebugMode where methods actually do something.
+/** Ensures the ProductionMode trait disables debug mode.
   *
   * @author Daniel Solano Gómez */
-trait Debug extends DebugMode {
-  /** Executes the body. */
-  protected final override def whenDebug(body: => Unit) {body}
+class ProductionModeSuite extends BuildModeSuite with ProductionMode {
+  def testWhenDebug() {
+    expect(false)(isDebugEnabled)
+  }
 }
 
-/** Production version of DebugMode; does nothing.
+/** Ensures the DebugMode trait enables debug mode.
   *
   * @author Daniel Solano Gómez */
-trait Production extends DebugMode {
-  /** Does nothing. */
-  protected final override def whenDebug(body: => Unit) {}
+class DebugModeSuite extends BuildModeSuite with DebugMode {
+  def testWhenDebug() {
+    expect(true)(isDebugEnabled)
+  }
 }
-
