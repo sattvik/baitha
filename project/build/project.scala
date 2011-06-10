@@ -1,7 +1,7 @@
 import sbt._
 
 trait Defaults {
-  def androidPlatformName = "android-7"
+  def androidPlatformName = "android-12"
 }
 
 class Parent(info: ProjectInfo) extends ParentProject(info) {
