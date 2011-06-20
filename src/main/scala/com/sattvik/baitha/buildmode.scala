@@ -29,6 +29,12 @@ trait BuildMode {
     * }
     * }}} */
   def whenDebug(body: => Unit)
+
+  /** If supported, enables strict mode for the current thread and VM. */
+  def enableStrictMode()
+
+  /** If supported, disables strict mode for the current thread and VM. */
+  def disableStrictMode()
 }
 
 /** The debug version of BuildMode where methods actually do something.
@@ -36,7 +42,61 @@ trait BuildMode {
   * @author Daniel Solano Gómez */
 trait DebugMode extends BuildMode {
   /** Executes the body. */
-  final override def whenDebug(body: => Unit) {body}
+  final def whenDebug(body: => Unit) {body}
+
+  /** Enables strict mode, if available. */
+  final def enableStrictMode() {
+    DebugMode.STRICT_MODE_HELPER.enableStrictMode()
+  }
+
+  /** Disables strict mode, if available. */
+  final def disableStrictMode() {
+    DebugMode.STRICT_MODE_HELPER.disableStrictMode()
+  }
+}
+
+/** Companion object to DebugMode that helps with strict mode.
+  *
+  * @author Daniel Solano Gómez */
+object DebugMode {
+  /** Helper object that handles strict mode, depending on which Android
+    * version is running. */
+  val STRICT_MODE_HELPER =
+    if (SdkVersions.currentSdkSince(SdkVersions.Gingerbread))
+      GingerbreadStrictModeHelper
+    else
+      PreGingerbreadStrictModeHelper
+
+  /** Interface for the strict mode helper. */
+  sealed trait StrictModeHelper {
+    def enableStrictMode()
+    def disableStrictMode()
+  }
+
+  /** The Gingerbread strict mode helper enables detection of all suspect
+    *  behaviours and logs them. */
+  object GingerbreadStrictModeHelper extends StrictModeHelper {
+    import android.os.StrictMode
+
+    def enableStrictMode() {
+      StrictMode.setThreadPolicy(
+        new StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
+      StrictMode.setVmPolicy(
+        new StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build())
+    }
+
+    def disableStrictMode() {
+      StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX)
+      StrictMode.setVmPolicy(StrictMode.VmPolicy.LAX)
+    }
+  }
+
+  /** The pre-Gingerbread helper does nothing. */
+  object PreGingerbreadStrictModeHelper extends StrictModeHelper {
+    def enableStrictMode() {}
+
+    def disableStrictMode() {}
+  }
 }
 
 /** The production version of BuildMode; does nothing.
@@ -44,6 +104,10 @@ trait DebugMode extends BuildMode {
   * @author Daniel Solano Gómez */
 trait ProductionMode extends BuildMode {
   /** Does nothing. */
-  final override def whenDebug(body: => Unit) {}
+  final def whenDebug(body: => Unit) {}
+
+  final def enableStrictMode() {}
+
+  final def disableStrictMode() {}
 }
 
