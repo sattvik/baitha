@@ -173,7 +173,7 @@ trait Logger {this: LogConfig with LogPrinter =>
 
   /** If the given log level is loggable, perform the given action. */
   private def whenLoggable(logLevel: Int)(action: () => Int) =
-    if (logLevel < config.minLogLevel) 0 else action
+    if (logLevel < config.minLogLevel) 0 else action()
 
   /** Logs an exception if the given log level is loggable. */
   private def logThrowable(logLevel: Int, throwable: Throwable) =
