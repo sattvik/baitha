@@ -20,6 +20,9 @@ package com.sattvik.baitha
   *
   * @author Daniel Solano Gómez */
 trait BuildMode {
+  /** A simple flag for whether or not debug mode is enabled. */
+  def debugMode: scala.Boolean
+
   /** Executes argument only if debugging is enabled.
     *
     * For example:
@@ -41,6 +44,9 @@ trait BuildMode {
   *
   * @author Daniel Solano Gómez */
 trait DebugMode extends BuildMode {
+  /** Hard code debug mode to true. */
+  final override val debugMode = true
+
   /** Executes the body. */
   final def whenDebug(body: => Unit) {body}
 
@@ -103,6 +109,9 @@ object DebugMode {
   *
   * @author Daniel Solano Gómez */
 trait ProductionMode extends BuildMode {
+  /** Hard code debug mode to false. */
+  final override val debugMode = false
+
   /** Does nothing. */
   final def whenDebug(body: => Unit) {}
 
