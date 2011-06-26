@@ -107,6 +107,15 @@ object AlertDialogBuilder {
       }
     }
   }
+
+  /** Converts a resource ID into content for the dialogue. */
+  implicit def intToContent(id: Int): Content = {
+    new Content {
+      def apply(b: AlertDialog.Builder) {
+        b.setMessage(id)
+      }
+    }
+  }
 }
 
 ///** A Scala-friendly version of Android's `AlertDialog.Builder`.  For

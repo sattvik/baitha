@@ -70,6 +70,12 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     }
   }
 
+  /** Tests using a resource ID-based message. */
+  def testResourceContent() {
+    AlertDialogBuilder(context, messageId)(mockFactory)
+    verify(builder).setMessage(messageId)
+  }
+
 //  /** Tests that passing in a view for a title sets a custom view. */
 //  def testCustomViewTitle() {
 //    val view = mock(classOf[View])
@@ -210,6 +216,8 @@ object AlertDialogBuilderSuite {
   val context = mock(classOf[Context])
   /** A string to use as message content. */
   val messageString = "A message"
+  /** A resource ID to use as message content. */
+  val messageId = android.R.string.untitled
 //  /** A sample title ID. */
 //  val titleId = android.R.string.dialog_alert_title
 //  /** A sample title string. */
@@ -220,6 +228,4 @@ object AlertDialogBuilderSuite {
 //  val iconId = android.R.drawable.ic_dialog_info
 //  /** A sample drawable icon. */
 //  val iconDrawable = mock(classOf[Drawable])
-//  /** A resource ID to use as message content. */
-//  val messageId = android.R.string.untitled
 }
