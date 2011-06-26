@@ -20,14 +20,15 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.View
-
 import org.mockito.Mockito._
 import org.scalatest.{OneInstancePerTest, Suite}
-
 import com.sattvik.baitha.AlertDialogBuilder
 import com.sattvik.baitha.AlertDialogBuilder._
 import com.sattvik.baitha.test.AlertDialogBuilderSuite._
 
+/** Test suite for the AlertDialogBuilder utility.
+  *
+  * @author Daniel Solano Gómez */
 class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
   /** Mock builder used to test the AlertDialogBuilder. */
   private val builder = mock(classOf[AlertDialog.Builder])
@@ -148,14 +149,20 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
   }
 }
 
+/** Constants for use by the `AlertDialogBuilderSuite` test suite.
+  *
+  * @author Daniel Solano Gómez */
 object AlertDialogBuilderSuite {
   /** A mock context to use as the argument for the AlertDialogBuilder. */
   val context = mock(classOf[Context])
-  /** A sample title ID to use during testing. */
+  /** A sample title ID. */
   val titleId = android.R.string.dialog_alert_title
+  /** A sample title string. */
   val titleString = "Some title"
+  /** A sample custom title view. */
   val titleView = mock(classOf[View])
+  /** A sample icon resource ID. */
   val iconId = android.R.drawable.ic_dialog_info
+  /** A sample drawable icon. */
   val iconDrawable = mock(classOf[Drawable])
-
 }
