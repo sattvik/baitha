@@ -287,6 +287,81 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     verify(builder).setPositiveButton(positiveButtonId, null)
   }
 
+  /** Tests adding a neutral button based on a resource ID. */
+  def testResourceNeutralButton() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      neutralButton = neutralButtonId
+    )(mockFactory)
+
+    verify(builder).setNeutralButton(neutralButtonId, null)
+  }
+
+  /** Tests adding a neutral button based on a string. */
+  def testStringNeutralButton() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      neutralButton = neutralButtonString
+    )(mockFactory)
+
+    verify(builder).setNeutralButton(neutralButtonString, null)
+  }
+
+  /** Tests adding a neutral button based on a resource ID along with a
+    * onClick listener. */
+  def testResourceNeutralButtonWithOnClickListener() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      neutralButton = neutralButtonId onClick neutralListener
+    )(mockFactory)
+
+    verify(builder).setNeutralButton(neutralButtonId, neutralListener)
+  }
+
+  /** Tests adding a neutral button based on a resource ID along with a
+    * onClick handler function. */
+  def testResourceNeutralButtonWithOnClickFunction() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      neutralButton = neutralButtonId onClick onClickFn
+    )(mockFactory)
+
+    verify(builder).setNeutralButton(
+      Matchers.eq(neutralButtonId),
+      isA(classOf[DialogInterface.OnClickListener]))
+  }
+
+  /** Tests adding a neutral button based on a string along with a onClick
+    *  handler function. */
+  def testStringNeutralButtonWithOnClickFunction() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      neutralButton = neutralButtonString onClick onClickFn
+    )(mockFactory)
+
+    verify(builder).setNeutralButton(
+      Matchers.eq(neutralButtonString),
+      isA(classOf[DialogInterface.OnClickListener]))
+  }
+
+  /** Tests adding a neutral button based on a resource ID along with a null
+    * onClick handler function. */
+  def testResourceNeutralButtonWithNullOnClickFunction() {
+    val fn: OnClickFunction = null
+    AlertDialogBuilder(
+      context,
+      messageString,
+      neutralButton = neutralButtonId onClick fn
+    )(mockFactory)
+
+    verify(builder).setNeutralButton(neutralButtonId, null)
+  }
+
   /** Tests adding a negative button based on a resource ID. */
   def testResourceNegativeButton() {
     AlertDialogBuilder(
@@ -389,10 +464,16 @@ object AlertDialogBuilderSuite {
   val positiveButtonString = "Yes"
   /** A listener for positive button click events. */
   val positiveListener = mock(classOf[DialogInterface.OnClickListener])
+  /** Resource ID for neutral button. */
+  val neutralButtonId = android.R.string.cancel
+  /** String for neutral button. */
+  val neutralButtonString = "Maybe"
+  /** A listener for neutral button click events. */
+  val neutralListener = mock(classOf[DialogInterface.OnClickListener])
   /** Resource ID for negative button. */
-  val negativeButtonId = android.R.string.yes
+  val negativeButtonId = android.R.string.no
   /** String for negative button. */
-  val negativeButtonString = "Yes"
+  val negativeButtonString = "No"
   /** A listener for negative button click events. */
   val negativeListener = mock(classOf[DialogInterface.OnClickListener])
   /** An on-click handler function. */

@@ -88,7 +88,7 @@ object AlertDialogBuilder {
       content,
       title,
       newButtonFunctor(positiveButton, PositiveButton),
-      newButtonFunctor(neutralButton, PositiveButton),
+      newButtonFunctor(neutralButton, NeutralButton),
       newButtonFunctor(negativeButton, NegativeButton)
     )
     new AlertDialogBuilder(context, factory, actions)
