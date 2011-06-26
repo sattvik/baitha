@@ -223,6 +223,17 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     verify(builder).setPositiveButton(positiveButtonId, null)
   }
 
+  /** Tests adding a positive button based on a string. */
+  def testStringPositiveButton() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      positiveButton = positiveButtonString
+    )(mockFactory)
+
+    verify(builder).setPositiveButton(positiveButtonString, null)
+  }
+
   /** Tests adding a positive button based on a resource ID along with a
     * onClick listener. */
   def testResourcePositiveButtonWithOnClickListener() {
@@ -249,6 +260,20 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
       isA(classOf[DialogInterface.OnClickListener]))
   }
 
+  /** Tests adding a positive button based on a string along with a onClick
+    *  handler function. */
+  def testStringPositiveButtonWithOnClickFunction() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      positiveButton = positiveButtonString onClick onClickFn
+    )(mockFactory)
+
+    verify(builder).setPositiveButton(
+      Matchers.eq(positiveButtonString),
+      isA(classOf[DialogInterface.OnClickListener]))
+  }
+
   /** Tests adding a positive button based on a resource ID along with a null
     * onClick handler function. */
   def testResourcePositiveButtonWithNullOnClickFunction() {
@@ -260,6 +285,81 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setPositiveButton(positiveButtonId, null)
+  }
+
+  /** Tests adding a negative button based on a resource ID. */
+  def testResourceNegativeButton() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      negativeButton = negativeButtonId
+    )(mockFactory)
+
+    verify(builder).setNegativeButton(negativeButtonId, null)
+  }
+
+  /** Tests adding a negative button based on a string. */
+  def testStringNegativeButton() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      negativeButton = negativeButtonString
+    )(mockFactory)
+
+    verify(builder).setNegativeButton(negativeButtonString, null)
+  }
+
+  /** Tests adding a negative button based on a resource ID along with a
+    * onClick listener. */
+  def testResourceNegativeButtonWithOnClickListener() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      negativeButton = negativeButtonId onClick negativeListener
+    )(mockFactory)
+
+    verify(builder).setNegativeButton(negativeButtonId, negativeListener)
+  }
+
+  /** Tests adding a negative button based on a resource ID along with a
+    * onClick handler function. */
+  def testResourceNegativeButtonWithOnClickFunction() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      negativeButton = negativeButtonId onClick onClickFn
+    )(mockFactory)
+
+    verify(builder).setNegativeButton(
+      Matchers.eq(negativeButtonId),
+      isA(classOf[DialogInterface.OnClickListener]))
+  }
+
+  /** Tests adding a negative button based on a string along with a onClick
+    *  handler function. */
+  def testStringNegativeButtonWithOnClickFunction() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      negativeButton = negativeButtonString onClick onClickFn
+    )(mockFactory)
+
+    verify(builder).setNegativeButton(
+      Matchers.eq(negativeButtonString),
+      isA(classOf[DialogInterface.OnClickListener]))
+  }
+
+  /** Tests adding a negative button based on a resource ID along with a null
+    * onClick handler function. */
+  def testResourceNegativeButtonWithNullOnClickFunction() {
+    val fn: OnClickFunction = null
+    AlertDialogBuilder(
+      context,
+      messageString,
+      negativeButton = negativeButtonId onClick fn
+    )(mockFactory)
+
+    verify(builder).setNegativeButton(negativeButtonId, null)
   }
 }
 
@@ -289,6 +389,12 @@ object AlertDialogBuilderSuite {
   val positiveButtonString = "Yes"
   /** A listener for positive button click events. */
   val positiveListener = mock(classOf[DialogInterface.OnClickListener])
+  /** Resource ID for negative button. */
+  val negativeButtonId = android.R.string.yes
+  /** String for negative button. */
+  val negativeButtonString = "Yes"
+  /** A listener for negative button click events. */
+  val negativeListener = mock(classOf[DialogInterface.OnClickListener])
   /** An on-click handler function. */
   val onClickFn = {(_: DialogInterface, _: Int) => }
 }

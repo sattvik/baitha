@@ -78,11 +78,19 @@ object AlertDialogBuilder {
     context: Context,
     content: Content,
     title: Title = NoOp,
-    positiveButton: PositiveButton = NoPositiveButton
+    positiveButton: Button = NoButton,
+    neutralButton: Button = NoButton,
+    negativeButton: Button = NoButton
   )(
     implicit factory: BuilderFactory
   ): AlertDialogBuilder = {
-    val actions = List(content, title, positiveButton)
+    val actions = List(
+      content,
+      title,
+      newButtonFunctor(positiveButton, PositiveButton),
+      newButtonFunctor(neutralButton, PositiveButton),
+      newButtonFunctor(negativeButton, NegativeButton)
+    )
     new AlertDialogBuilder(context, factory, actions)
   }
 
@@ -213,33 +221,95 @@ object AlertDialogBuilder {
     * @tparam T used as return type for `onClick` to ensure type checking works
     * out
     */
-  sealed abstract class Button[T <: Button[_]] extends DialogueFunctor {
+  sealed class Button(val message: Option[Any]) {
     /** An optional listener that will handle button clicks. */
-    protected var listener: Option[OnClickListener] = None
+    var listener: Option[OnClickListener] = None
+
+    require(
+      message match {
+        case Some(_: Int)          => true
+        case Some(_: CharSequence) => true
+        case None                  => true
+        case _                     => false
+      }, "Button message be an Int or a CharSequence.")
 
     /** Adds the listener to the button. */
-    final def onClick(l: OnClickListener): T = {
-      if(l != null) {
+    final def onClick(l: OnClickListener): Button = {
+      require(message.isDefined, "Cannot set a listener without a message")
+      if (l != null) {
         listener = Some(l)
       }
-      this.asInstanceOf[T]
+      this
     }
   }
 
-  /** Abstract class for positive buttons. */
-  sealed abstract class PositiveButton extends Button[PositiveButton]
+  /** Creates a button from a resource ID. */
+  implicit def resourceIdToButton(id: Int): Button = new Button(Some(id))
 
-  /** Creates a positive button from a resource ID. */
-  implicit def resourceIdToPositiveButton(id: Int): PositiveButton = {
-    new PositiveButton {
-      def apply(b: AndroidBuilder) {
-        b.setPositiveButton(id, listener.orNull)
+  /** Creates a button from a character sequence. */
+  implicit def charSeqToButton(text: CharSequence): Button = {
+    new Button(Some(text))
+  }
+
+  /** An object for no button. */
+  object NoButton extends Button(None)
+
+  /** An enumeration of all the button types. */
+  private sealed trait ButtonType
+  private case object PositiveButton extends ButtonType
+  private case object NeutralButton extends ButtonType
+  private case object NegativeButton extends ButtonType
+
+  /** Creates a new functor for the given button and type. */
+  private def newButtonFunctor(
+    button: Button,
+    buttonType: ButtonType
+  ):  DialogueFunctor = {
+    button.message map {
+      val listener = button.listener.orNull
+      _ match {
+        case id: Int => {
+          new ResourceButtonFunctor(id, listener, buttonType)
+        }
+        case text: CharSequence => {
+          new CharSeqButtonFunctor(text, listener, buttonType)
+        }
+        case _ => NoOp
+      }
+    } getOrElse NoOp
+  }
+
+  /** Applies a text-based button to a builder. */
+  private class CharSeqButtonFunctor(
+    text: CharSequence,
+    listener: OnClickListener,
+    buttonType: ButtonType
+  ) extends DialogueFunctor {
+
+    def apply(b: AndroidBuilder) {
+      buttonType match {
+        case PositiveButton => b.setPositiveButton(text, listener)
+        case NeutralButton  => b.setNeutralButton(text, listener)
+        case NegativeButton => b.setNegativeButton(text, listener)
       }
     }
   }
 
-  /** An object for no positive button. */
-  object NoPositiveButton extends PositiveButton with NoOp
+  /** Applies a resource ID-based button to a builder. */
+  private class ResourceButtonFunctor(
+    id: Int,
+    listener: OnClickListener,
+    buttonType: ButtonType
+  ) extends DialogueFunctor {
+
+    def apply(b: AndroidBuilder) {
+      buttonType match {
+        case PositiveButton => b.setPositiveButton(id, listener)
+        case NeutralButton  => b.setNeutralButton(id, listener)
+        case NegativeButton => b.setNegativeButton(id, listener)
+      }
+    }
+  }
 
   /** A handy trait that defines a no-operation behaviour. */
   trait NoOp extends DialogueFunctor {
@@ -251,7 +321,7 @@ object AlertDialogBuilder {
 
   /** Converts an `OnClickFunction` to an `OnClickListener`. */
   implicit def fnToOnClickListener(fn: OnClickFunction): OnClickListener = {
-    whenNotNull(fn) { () =>
+    whenNotNull(fn) {() =>
       new DialogInterface.OnClickListener {
         def onClick(dialog: DialogInterface, button: Int) {
           fn(dialog, button)
@@ -260,6 +330,7 @@ object AlertDialogBuilder {
     }
   }
 
+  /** When the first argument is not null, evaluates the thunk. */
   private def whenNotNull[T, U](t: T)(thunk: () => U): U = {
     if (t != null) thunk() else null.asInstanceOf[U]
   }
