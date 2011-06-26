@@ -18,7 +18,7 @@ package com.sattvik.baitha
 
 import android.app.AlertDialog
 import android.content.Context
-import com.sattvik.baitha.AlertDialogBuilder.BuilderFactory
+import com.sattvik.baitha.AlertDialogBuilder.{DialogueFunctor, BuilderFactory}
 
 /** Builds or shows an alert dialogue from the arguments passed in to the
   * constructor.  Too how to use the builder, refer to the documentation for
@@ -31,15 +31,21 @@ import com.sattvik.baitha.AlertDialogBuilder.BuilderFactory
   * @param context the context for the builder and the generated `AlertDialog`
   * @param factory a function used to create new `AlertDialog.Builder`
   * objects, primarily exists to inject mock objects for testing
+  * @param actions the collection of dialogue component action
   *
   * @author Daniel Solano Gómez */
 class AlertDialogBuilder private(
   context: Context,
-  factory: BuilderFactory
+  factory: BuilderFactory,
+  actions: List[DialogueFunctor]
 ) {
-  require(context != null, "Dialog context must not be null.")
+
   /** The underlying builder. */
   private val builder = factory(context)
+
+  require(context != null, "Dialog context must not be null.")
+  // apply all of the actions to the builder
+  actions foreach (_(builder))
 
   /** Creates an `AlertDialog` with the arguments supplied to this builder.
     * It does not `show()` the dialog. This allows the user to do any extra
@@ -66,11 +72,13 @@ object AlertDialogBuilder {
     * creates.  Must not be `null`.
     */
   def apply(
-    context: Context
+    context: Context,
+    content: Content
   )(
     implicit factory: BuilderFactory
   ): AlertDialogBuilder = {
-    new AlertDialogBuilder(context, factory)
+    val actions = List(content)
+    new AlertDialogBuilder(context, factory, actions)
   }
 
   /** Trait for a factory object that creates new `AlertDialog.Builder`
@@ -82,6 +90,23 @@ object AlertDialogBuilder {
   /** The default `BuilderFactory`, which simply creates a new
     * `AlertDialog.Builder` object using the given context. */
   implicit val defaultFactory = new AlertDialog.Builder(_: Context)
+
+  /** A generic dialogue functor is an abstraction by which a particular user
+    * setting is applied to the dialogue builder. */
+  sealed trait DialogueFunctor extends ((AlertDialog.Builder) => Unit)
+
+  /** The type for all content of an alert dialogue. */
+  sealed trait Content extends DialogueFunctor
+
+  /** Converts a character sequence into content for the dialogue. */
+  implicit def charSeqToContent(text: CharSequence): Content = {
+    require(text != null, "Message must not be null.")
+    new Content {
+      def apply(b: AlertDialog.Builder) {
+        b.setMessage(text)
+      }
+    }
+  }
 }
 
 ///** A Scala-friendly version of Android's `AlertDialog.Builder`.  For
@@ -232,23 +257,6 @@ object AlertDialogBuilder {
 //      }
 //    } else {
 //      null
-//    }
-//  }
-//
-//  /** Master trait for alert dialog components. */
-//  sealed trait DialogComponent {
-//    /** Applies the component to the given builder. */
-//    def apply(builder: Builder)
-//  }
-//
-//  /** Trait that defines the various content types for an alert dialogue. */
-//  sealed trait Content extends DialogComponent
-//
-//  implicit def charSeqToContent(text: CharSequence): Content = {
-//    new Content {
-//      def apply(builder: Builder) {
-//        builder.setMessage(text)
-//      }
 //    }
 //  }
 //

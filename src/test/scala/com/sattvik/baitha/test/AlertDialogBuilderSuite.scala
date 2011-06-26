@@ -35,24 +35,38 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
 
   /** Builder creator to inject the mock builder into the tested
     * AlertDialogBuilder. */
-  private def mockFactory(c: Context) = builder
+  private val mockFactory = { c: Context => builder }
 
   /** Tests that the underlying create method is called. */
   def testDefaultsCreate() {
-    AlertDialogBuilder(context)(mockFactory).create
+    AlertDialogBuilder(context, messageString)(mockFactory).create
     verify(builder).create
   }
 
   /** Tests that the underlying show method is called. */
   def testDefaultsShow() {
-    AlertDialogBuilder(context)(mockFactory).show()
+    AlertDialogBuilder(context, messageString)(mockFactory).show()
     verify(builder).show()
   }
 
   /** Tests that trying to pass in a null context fails. */
   def testNullContext() {
     intercept[IllegalArgumentException] {
-      AlertDialogBuilder(null)(mockFactory)
+      AlertDialogBuilder(null, messageString)(mockFactory)
+    }
+  }
+
+  /** Tests defining a string-based message. */
+  def testStringContent() {
+    AlertDialogBuilder(context, messageString)(mockFactory)
+    verify(builder).setMessage(messageString)
+  }
+
+  /** Tests trying use null string as content fails.. */
+  def testNullStringContent() {
+    val nullString: String = null
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(context, nullString)(mockFactory)
     }
   }
 
@@ -186,10 +200,6 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
 //      )(mockBuilderCreator)
 //    }
 //  }
-//
-//  def testStringContent() {
-//    new AlertDialogBuilder(context, messageString, title = titleId)
-//  }
 }
 
 /** Constants for use by the `AlertDialogBuilderSuite` test suite.
@@ -198,6 +208,8 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
 object AlertDialogBuilderSuite {
   /** A mock context to use as the argument for the AlertDialogBuilder. */
   val context = mock(classOf[Context])
+  /** A string to use as message content. */
+  val messageString = "A message"
 //  /** A sample title ID. */
 //  val titleId = android.R.string.dialog_alert_title
 //  /** A sample title string. */
@@ -208,8 +220,6 @@ object AlertDialogBuilderSuite {
 //  val iconId = android.R.drawable.ic_dialog_info
 //  /** A sample drawable icon. */
 //  val iconDrawable = mock(classOf[Drawable])
-//  /** A string to use as message content. */
-//  val messageString = "A message"
 //  /** A resource ID to use as message content. */
 //  val messageId = android.R.string.untitled
 }
