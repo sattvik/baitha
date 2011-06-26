@@ -17,14 +17,17 @@
 package com.sattvik.baitha.test
 
 import android.app.AlertDialog
-import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.View
 import org.mockito.Mockito._
+import org.mockito.Matchers
+import org.mockito.Matchers._
 import org.scalatest.{OneInstancePerTest, Suite}
 import com.sattvik.baitha.AlertDialogBuilder
 import com.sattvik.baitha.AlertDialogBuilder._
 import com.sattvik.baitha.test.AlertDialogBuilderSuite._
+import android.content.{DialogInterface, Context}
+import org.mockito.Matchers
 
 /** Test suite for the AlertDialogBuilder utility.
   *
@@ -60,6 +63,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
   def testStringContent() {
     AlertDialogBuilder(context, messageString)(mockFactory)
     verify(builder).setMessage(messageString)
+    verifyNoMoreInteractions(builder)
   }
 
   /** Tests trying use null string as content fails.. */
@@ -207,6 +211,56 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
       )(mockFactory)
     }
   }
+
+  /** Tests adding a positive button based on a resource ID. */
+  def testResourcePositiveButton() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      positiveButton = positiveButtonId
+    )(mockFactory)
+
+    verify(builder).setPositiveButton(positiveButtonId, null)
+  }
+
+  /** Tests adding a positive button based on a resource ID along with a
+    * onClick listener. */
+  def testResourcePositiveButtonWithOnClickListener() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      positiveButton = positiveButtonId onClick positiveListener
+    )(mockFactory)
+
+    verify(builder).setPositiveButton(positiveButtonId, positiveListener)
+  }
+
+  /** Tests adding a positive button based on a resource ID along with a
+    * onClick handler function. */
+  def testResourcePositiveButtonWithOnClickFunction() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      positiveButton = positiveButtonId onClick onClickFn
+    )(mockFactory)
+
+    verify(builder).setPositiveButton(
+      Matchers.eq(positiveButtonId),
+      isA(classOf[DialogInterface.OnClickListener]))
+  }
+
+  /** Tests adding a positive button based on a resource ID along with a null
+    * onClick handler function. */
+  def testResourcePositiveButtonWithNullOnClickFunction() {
+    val fn: OnClickFunction = null
+    AlertDialogBuilder(
+      context,
+      messageString,
+      positiveButton = positiveButtonId onClick fn
+    )(mockFactory)
+
+    verify(builder).setPositiveButton(positiveButtonId, null)
+  }
 }
 
 /** Constants for use by the `AlertDialogBuilderSuite` test suite.
@@ -229,4 +283,12 @@ object AlertDialogBuilderSuite {
   val iconId = android.R.drawable.ic_dialog_info
   /** A sample drawable icon. */
   val iconDrawable = mock(classOf[Drawable])
+  /** Resource ID for positive button. */
+  val positiveButtonId = android.R.string.yes
+  /** String for positive button. */
+  val positiveButtonString = "Yes"
+  /** A listener for positive button click events. */
+  val positiveListener = mock(classOf[DialogInterface.OnClickListener])
+  /** An on-click handler function. */
+  val onClickFn = {(_: DialogInterface, _: Int) => }
 }

@@ -17,7 +17,8 @@
 package com.sattvik.baitha
 
 import android.app.AlertDialog
-import android.content.Context
+import android.content.{DialogInterface, Context}
+import android.content.DialogInterface.OnClickListener
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.sattvik.baitha.AlertDialogBuilder.{DialogueFunctor, BuilderFactory}
@@ -76,11 +77,12 @@ object AlertDialogBuilder {
   def apply(
     context: Context,
     content: Content,
-    title: Title = NoOp
+    title: Title = NoOp,
+    positiveButton: PositiveButton = NoPositiveButton
   )(
     implicit factory: BuilderFactory
   ): AlertDialogBuilder = {
-    val actions = List(content, title)
+    val actions = List(content, title, positiveButton)
     new AlertDialogBuilder(context, factory, actions)
   }
 
@@ -91,6 +93,9 @@ object AlertDialogBuilder {
     * factory for the purposes of testing.
     */
   type BuilderFactory = Context => AndroidBuilder
+  /** Handy name for a function that can be converted into a
+    * `DialogInterface.OnClickListener` */
+  type OnClickFunction = (DialogInterface, Int) => Unit
 
   /** The default `BuilderFactory`, which simply creates a new
     * `AlertDialog.Builder` object using the given context. */
@@ -202,9 +207,61 @@ object AlertDialogBuilder {
     }
   }
 
+  /** Abstract superclass to all button types that adds support for an
+    * optional on-click listener.
+    *
+    * @tparam T used as return type for `onClick` to ensure type checking works
+    * out
+    */
+  sealed abstract class Button[T <: Button[_]] extends DialogueFunctor {
+    /** An optional listener that will handle button clicks. */
+    protected var listener: Option[OnClickListener] = None
+
+    /** Adds the listener to the button. */
+    final def onClick(l: OnClickListener): T = {
+      if(l != null) {
+        listener = Some(l)
+      }
+      this.asInstanceOf[T]
+    }
+  }
+
+  /** Abstract class for positive buttons. */
+  sealed abstract class PositiveButton extends Button[PositiveButton]
+
+  /** Creates a positive button from a resource ID. */
+  implicit def resourceIdToPositiveButton(id: Int): PositiveButton = {
+    new PositiveButton {
+      def apply(b: AndroidBuilder) {
+        b.setPositiveButton(id, listener.orNull)
+      }
+    }
+  }
+
+  /** An object for no positive button. */
+  object NoPositiveButton extends PositiveButton with NoOp
+
+  /** A handy trait that defines a no-operation behaviour. */
+  trait NoOp extends DialogueFunctor {
+    def apply(b: AndroidBuilder) {}
+  }
+
   /** A sensible default that does nothing. */
-  object NoOp extends Title {
-    def apply(b: AlertDialog.Builder) {}
+  object NoOp extends Title with NoOp
+
+  /** Converts an `OnClickFunction` to an `OnClickListener`. */
+  implicit def fnToOnClickListener(fn: OnClickFunction): OnClickListener = {
+    whenNotNull(fn) { () =>
+      new DialogInterface.OnClickListener {
+        def onClick(dialog: DialogInterface, button: Int) {
+          fn(dialog, button)
+        }
+      }
+    }
+  }
+
+  private def whenNotNull[T, U](t: T)(thunk: () => U): U = {
+    if (t != null) thunk() else null.asInstanceOf[U]
   }
 }
 
@@ -341,10 +398,6 @@ object AlertDialogBuilder {
 //  //      }
 //  //    }
 //  //  }
-//  private def foo[T, U](t: T)(f: () => U): U = {
-//    if (t != null) f() else null.asInstanceOf[U]
-//  }
-//
 //  /** Conversion of a `OnMultiChoiceClickFunction` to the appropriate listener
 //    * instance.  If the function is `null`, returns `null`. */
 //  implicit def fnToOnMultiChoiceClickListener(f: OnMultiChoiceClick): OnMultiChoiceClickListener = {
