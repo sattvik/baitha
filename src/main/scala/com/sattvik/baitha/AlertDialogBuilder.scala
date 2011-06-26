@@ -84,19 +84,21 @@ object AlertDialogBuilder {
     new AlertDialogBuilder(context, factory, actions)
   }
 
+  /** Handy name for the underlying builder type. */
+  type AndroidBuilder = AlertDialog.Builder
   /** Trait for a factory object that creates new `AlertDialog.Builder`
     * objects.  The main purpose of this trait is to be able to inject a mock
     * factory for the purposes of testing.
     */
-  type BuilderFactory = Context => AlertDialog.Builder
+  type BuilderFactory = Context => AndroidBuilder
 
   /** The default `BuilderFactory`, which simply creates a new
     * `AlertDialog.Builder` object using the given context. */
-  implicit val defaultFactory = new AlertDialog.Builder(_: Context)
+  implicit val defaultFactory = new AndroidBuilder(_: Context)
 
   /** A generic dialogue functor is an abstraction by which a particular user
     * setting is applied to the dialogue builder. */
-  sealed trait DialogueFunctor extends ((AlertDialog.Builder) => Unit)
+  sealed trait DialogueFunctor extends ((AndroidBuilder) => Unit)
 
   /** The type for all content of an alert dialogue. */
   sealed trait Content extends DialogueFunctor
@@ -105,7 +107,7 @@ object AlertDialogBuilder {
   implicit def charSeqToContent(text: CharSequence): Content = {
     require(text != null, "Message must not be null.")
     new Content {
-      def apply(b: AlertDialog.Builder) {
+      def apply(b: AndroidBuilder) {
         b.setMessage(text)
       }
     }
@@ -114,7 +116,7 @@ object AlertDialogBuilder {
   /** Converts a resource ID into content for the dialogue. */
   implicit def intToContent(id: Int): Content = {
     new Content {
-      def apply(b: AlertDialog.Builder) {
+      def apply(b: AndroidBuilder) {
         b.setMessage(id)
       }
     }
@@ -129,7 +131,7 @@ object AlertDialogBuilder {
     require(view != null, "Custom title view must not be null.")
 
     new Title {
-      override def apply(builder: AlertDialog.Builder) {
+      override def apply(builder: AndroidBuilder) {
         builder.setCustomTitle(view)
       }
     }
@@ -148,7 +150,7 @@ object AlertDialogBuilder {
     }
 
     /** Adds the icon to the title, if available. */
-    def apply(builder: AlertDialog.Builder) {
+    def apply(builder: AndroidBuilder) {
       icon foreach (_(builder))
     }
   }
@@ -157,7 +159,7 @@ object AlertDialogBuilder {
     * of a regular title. */
   implicit def idToRegularTitle(id: Int): RegularTitle = {
     new RegularTitle {
-      override def apply(builder: AlertDialog.Builder) {
+      override def apply(builder: AndroidBuilder) {
         builder.setTitle(id)
         super.apply(builder)
       }
@@ -170,7 +172,7 @@ object AlertDialogBuilder {
     require(text != null, "Title string must not be null")
 
     new RegularTitle {
-      override def apply(builder: AlertDialog.Builder) {
+      override def apply(builder: AndroidBuilder) {
         builder.setTitle(text)
         super.apply(builder)
       }
@@ -185,7 +187,7 @@ object AlertDialogBuilder {
     require(d != null, "Icon drawable must not be null.")
 
     new Icon {
-      override def apply(builder: AlertDialog.Builder) {
+      override def apply(builder: AndroidBuilder) {
         builder.setIcon(d)
       }
     }
@@ -194,7 +196,7 @@ object AlertDialogBuilder {
   /** Allows conversion of a resource ID into an appropriate `Icon`. */
   implicit def resourceIdToIcon(id: Int): Icon = {
     new Icon {
-      override def apply(builder: AlertDialog.Builder) {
+      override def apply(builder: AndroidBuilder) {
         builder.setIcon(id)
       }
     }
