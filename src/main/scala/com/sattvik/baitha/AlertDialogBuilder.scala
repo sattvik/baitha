@@ -18,6 +18,8 @@ package com.sattvik.baitha
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.drawable.Drawable
+import android.view.View
 import com.sattvik.baitha.AlertDialogBuilder.{DialogueFunctor, BuilderFactory}
 
 /** Builds or shows an alert dialogue from the arguments passed in to the
@@ -73,11 +75,12 @@ object AlertDialogBuilder {
     */
   def apply(
     context: Context,
-    content: Content
+    content: Content,
+    title: Title = NoOp
   )(
     implicit factory: BuilderFactory
   ): AlertDialogBuilder = {
-    val actions = List(content)
+    val actions = List(content, title)
     new AlertDialogBuilder(context, factory, actions)
   }
 
@@ -115,6 +118,91 @@ object AlertDialogBuilder {
         b.setMessage(id)
       }
     }
+  }
+
+  /** The master trait for any title for an alert dialogue. */
+  sealed trait Title extends DialogueFunctor
+
+  /** Converts the given view into a custom title for the dialogue.  This
+    * type of title does not support an icon. */
+  implicit def viewToCustomTitle(view: View): Title = {
+    require(view != null, "Custom title view must not be null.")
+
+    new Title {
+      override def apply(builder: AlertDialog.Builder) {
+        builder.setCustomTitle(view)
+      }
+    }
+  }
+
+  /** A regular title consists of a message and an optional icon. */
+  sealed class RegularTitle extends Title {title =>
+    /** An optional icon that will be part of the title. */
+    private[this] var icon: Option[Icon] = None
+
+    /** Adds the icon to the title. */
+    final def withIcon(icon: Icon): RegularTitle = {
+      require(icon != null)
+      title.icon = Some(icon)
+      this
+    }
+
+    /** Adds the icon to the title, if available. */
+    def apply(builder: AlertDialog.Builder) {
+      icon foreach (_(builder))
+    }
+  }
+
+  /** Converts an integer, presumably a resource ID, into the message portion
+    * of a regular title. */
+  implicit def idToRegularTitle(id: Int): RegularTitle = {
+    new RegularTitle {
+      override def apply(builder: AlertDialog.Builder) {
+        builder.setTitle(id)
+        super.apply(builder)
+      }
+    }
+  }
+
+  /** Converts a character sequence into the message portion of a regular
+    * title. */
+  implicit def textToRegularTitle(text: CharSequence): RegularTitle = {
+    require(text != null, "Title string must not be null")
+
+    new RegularTitle {
+      override def apply(builder: AlertDialog.Builder) {
+        builder.setTitle(text)
+        super.apply(builder)
+      }
+    }
+  }
+
+  /** The master trait for all of the icon types. */
+  sealed trait Icon extends DialogueFunctor
+
+  /** Allows conversion of a drawable into an appropriate `Icon`. */
+  implicit def drawableToIcon(d: Drawable): Icon = {
+    require(d != null, "Icon drawable must not be null.")
+
+    new Icon {
+      override def apply(builder: AlertDialog.Builder) {
+        builder.setIcon(d)
+      }
+    }
+  }
+
+  /** Allows conversion of a resource ID into an appropriate `Icon`. */
+  implicit def resourceIdToIcon(id: Int): Icon = {
+    new Icon {
+      override def apply(builder: AlertDialog.Builder) {
+        builder.setIcon(id)
+      }
+    }
+  }
+
+  /** A sensible default that does nothing. */
+  object NoOp extends Title {
+    def apply(b: AlertDialog.Builder) {}
   }
 }
 
@@ -506,90 +594,6 @@ object AlertDialogBuilder {
 //  //      builder.setView(view)
 //  //    }
 //  //  }
-//  /** The master trait for any title for an alert dialogue. */
-//  sealed trait Title extends DialogComponent
-//
-//  object NoTitle extends Title {
-//    def apply(builder: Builder) {}
-//  }
-//
-//  /** A regular title consists of a message and an optional icon. */
-//  sealed class RegularTitle extends Title {title =>
-//    /** An optional icon that will be part of the title. */
-//    private[this] var icon: Option[Icon] = None
-//
-//    /** Adds the icon to the title. */
-//    final def withIcon(icon: Icon): RegularTitle = {
-//      require(icon != null)
-//      title.icon = Some(icon)
-//      this
-//    }
-//
-//    /** Adds the icon to the title, if available. */
-//    def apply(builder: Builder) {
-//      icon foreach (_.apply(builder))
-//    }
-//  }
-//
-//  /** Converts an integer, presumably a resource ID, into the message portion
-//    * of a regular title. */
-//  implicit def idToRegularTitle(id: Int): RegularTitle = {
-//    new RegularTitle {
-//      override def apply(builder: Builder) {
-//        builder.setTitle(id)
-//        super.apply(builder)
-//      }
-//    }
-//  }
-//
-//  /** Converts a character sequence into the message portion of a regular
-//    * title. */
-//  implicit def textToRegularTitle(text: CharSequence): RegularTitle = {
-//    require(text != null, "Title string must not be null")
-//
-//    new RegularTitle {
-//      override def apply(builder: Builder) {
-//        builder.setTitle(text)
-//        super.apply(builder)
-//      }
-//    }
-//  }
-//
-//  /** Converts the given view into a custom title for the dialogue.  This
-//    * type of title does not support an icon. */
-//  implicit def viewToCustomTitle(view: View): Title = {
-//    require(view != null, "Custom title view must not be null.")
-//
-//    new Title {
-//      override def apply(builder: Builder) {
-//        builder.setCustomTitle(view)
-//      }
-//    }
-//  }
-//
-//  /** The master trait for all of the icon types. */
-//  sealed trait Icon extends DialogComponent
-//
-//  /** Allows conversion of a drawable into an appropriate `Icon`. */
-//  implicit def drawableToIcon(d: Drawable): Icon = {
-//    require(d != null, "Icon drawable must not be null.")
-//
-//    new Icon {
-//      override def apply(builder: Builder) {
-//        builder.setIcon(d)
-//      }
-//    }
-//  }
-//
-//  /** Allows conversion of a resource ID into an appropriate `Icon`. */
-//  implicit def resourceIdToIcon(id: Int): Icon = {
-//    new Icon {
-//      override def apply(builder: Builder) {
-//        builder.setIcon(id)
-//      }
-//    }
-//  }
-//
 //  /** Provides information for a dialog button.
 //    *
 //    * @param message must either be an integer resource ID or a character
