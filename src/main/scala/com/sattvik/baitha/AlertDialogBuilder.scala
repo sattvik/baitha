@@ -327,6 +327,26 @@ object AlertDialogBuilder {
   /** The type for all content of an alert dialogue. */
   sealed trait Content extends DialogueFunctor
 
+  /** Provides an `onClick` method that can be used to set an `OnClickListener`
+    * option.
+    *
+    * @tparam T a return type for the `onClick` method */
+  sealed trait OnClick[T] {
+    /** The listener, if set. */
+    private var _listener: Option[OnClickListener] = None
+
+    /** Returns either the listener or null. */
+    def listener: OnClickListener = _listener.orNull
+
+    /** Sets the listener for the list.  */
+    def onClick(l: OnClickListener): T = {
+      if (l != null) {
+        _listener = Some(l)
+      }
+      this.asInstanceOf[T]
+    }
+  }
+
   /** Converts a character sequence into content for the dialogue. */
   implicit def charSeqToContent(text: CharSequence): Content = {
     require(text != null, "Message must not be null.")
@@ -356,23 +376,14 @@ object AlertDialogBuilder {
     *
     * @param adapter the adapter to use as the source of the list
     */
-  final class AdapterContent(adapter: ListAdapter) extends Content {
-    /** The listener to notify in the case of a selection or checking. */
-    var listener: Option[OnClickListener] = None
+  final class AdapterContent(adapter: ListAdapter)
+      extends Content with OnClick[AdapterContent] {
     /** If set, the single item that should be checked where -1 signifies that
       * no item will be checked though the list will support a single
       * choice. */
     var checkedItem: Option[Int] = None
 
     require(adapter != null, "Adapter must not be null.")
-
-    /** Sets the listener for the list.  */
-    def onClick(l: OnClickListener): AdapterContent = {
-      if (l != null) {
-        listener = Some(l)
-      }
-      this
-    }
 
     /** Specifies which item of the list is checked.  Once this method is
       * called, the
@@ -393,9 +404,9 @@ object AlertDialogBuilder {
     /** Applies the adapter to the underlying Android builder. */
     def apply(b: AndroidBuilder) {
       if (checkedItem.isDefined) {
-        b.setSingleChoiceItems(adapter, checkedItem.get, listener.orNull)
+        b.setSingleChoiceItems(adapter, checkedItem.get, listener)
       } else {
-        b.setAdapter(adapter, listener.orNull)
+        b.setAdapter(adapter, listener)
       }
     }
   }
@@ -491,10 +502,7 @@ object AlertDialogBuilder {
     * @tparam T used as return type for `onClick` to ensure type checking works
     * out
     */
-  sealed class Button(val message: Option[Any]) {
-    /** An optional listener that will handle button clicks. */
-    var listener: Option[OnClickListener] = None
-
+  sealed class Button(val message: Option[Any]) extends OnClick[Button] {
     require(
       message match {
         case Some(_: Int)          => true
@@ -504,12 +512,9 @@ object AlertDialogBuilder {
       }, "Button message be an Int or a CharSequence.")
 
     /** Adds the listener to the button. */
-    final def onClick(l: OnClickListener): Button = {
+    override def onClick(l: OnClickListener): Button = {
       require(message.isDefined, "Cannot set a listener without a message")
-      if (l != null) {
-        listener = Some(l)
-      }
-      this
+      super.onClick(l)
     }
   }
 
@@ -536,7 +541,7 @@ object AlertDialogBuilder {
     buttonType: ButtonType
   ): DialogueFunctor = {
     button.message map {
-      val listener = button.listener.orNull
+      val listener = button.listener
       _ match {
         case id: Int => {
           new ResourceButtonFunctor(id, listener, buttonType)
