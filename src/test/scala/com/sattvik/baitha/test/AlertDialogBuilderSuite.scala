@@ -40,14 +40,22 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     * AlertDialogBuilder. */
   private val mockFactory = { c: Context => builder }
 
+  /** Tests the default settings. */
+  def testDefaults() {
+    AlertDialogBuilder(context, messageString)(mockFactory)
+    verify(builder).setMessage(messageString)
+    verify(builder).setCancelable(true)
+    verifyNoMoreInteractions(builder)
+  }
+
   /** Tests that the underlying create method is called. */
-  def testDefaultsCreate() {
+  def testCreate() {
     AlertDialogBuilder(context, messageString)(mockFactory).create
     verify(builder).create
   }
 
   /** Tests that the underlying show method is called. */
-  def testDefaultsShow() {
+  def testShow() {
     AlertDialogBuilder(context, messageString)(mockFactory).show()
     verify(builder).show()
   }
@@ -63,7 +71,6 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
   def testStringContent() {
     AlertDialogBuilder(context, messageString)(mockFactory)
     verify(builder).setMessage(messageString)
-    verifyNoMoreInteractions(builder)
   }
 
   /** Tests trying use null string as content fails.. */
@@ -435,6 +442,28 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setNegativeButton(negativeButtonId, null)
+  }
+
+  /** Tests turning off cancellation. */
+  def testNotCancellable() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      cancellable = false
+    )(mockFactory)
+
+    verify(builder).setCancelable(false)
+  }
+
+  /** Tests turning off cancellation. */
+  def testCancellable() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      cancellable = true
+    )(mockFactory)
+
+    verify(builder).setCancelable(true)
   }
 }
 

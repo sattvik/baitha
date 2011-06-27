@@ -35,12 +35,14 @@ import com.sattvik.baitha.AlertDialogBuilder.{DialogueFunctor, BuilderFactory}
   * @param factory a function used to create new `AlertDialog.Builder`
   * objects, primarily exists to inject mock objects for testing
   * @param actions the collection of dialogue component action
+  * @param cancellable whether or not the dialogue should be cancellable
   *
   * @author Daniel Solano Gómez */
 class AlertDialogBuilder private(
   context: Context,
   factory: BuilderFactory,
-  actions: List[DialogueFunctor]
+  actions: List[DialogueFunctor],
+  cancellable: Boolean
 ) {
 
   /** The underlying builder. */
@@ -49,6 +51,7 @@ class AlertDialogBuilder private(
   require(context != null, "Dialog context must not be null.")
   // apply all of the actions to the builder
   actions foreach (_(builder))
+  builder.setCancelable(cancellable)
 
   /** Creates an `AlertDialog` with the arguments supplied to this builder.
     * It does not `show()` the dialog. This allows the user to do any extra
@@ -66,13 +69,151 @@ class AlertDialogBuilder private(
 /** Defines the factory function for creating a new builder, as well as a
   * number of auxiliary types and implicit conversions.
   *
+  * = Building a dialogue =
+  *
+  * To take full advantage of this builder, you will need to have imports as
+  * follows:
+  *
+  * {{{
+  * import com.sattvik.baitha.AlertDialogBuilder
+  * import com.sattvik.baitha.AlertDialogBuilder._
+  * }}}
+  *
+  * With these imports, you can create a minimal dialogue that contains a
+  * message as follows, where `context` is a valid Android context:
+  *
+  * {{{
+  * val builder = AlertDialogBuilder(context, "Some text.")
+  * }}}
+  *
+  * However, there is much more that you can do.  The only requirement is
+  * that you specify content and provide a valid context.
+  *
+  * == Specifying content ==
+  *
+  * Currently, only message-type content is supported.  You can specify the
+  * message as a string or as resource ID reference to a string, as follows:
+  *
+  * {{{
+  * // using a string
+  * AlertDialogBuilder(context, "A String.")
+  *
+  * // using a resource ID
+  * AlertDialogBuilder(context, R.string.message)
+  * }}}
+  *
+  * == Specifying the title ==
+  *
+  * Android supports regular titles that contain some text and an optional
+  * icon.  If this is insufficient, you can also provide a custom view that
+  * will be used as the title.
+  *
+  * === Regular titles ===
+  *
+  * A regular title must have a string, which can be passed directly as an
+  * argument, or indirectly as a resource ID:
+  *
+  * {{{
+  * AlertDialogBuilder(…, title = "My Title")
+  * AlertDialogBuilder(…, title = R.string.my_title)
+  * }}}
+  *
+  * If you wish to include an icon in your title, you can include it by
+  * following the title string/id with `withIcon` and either a resource ID
+  * for a drawable or a `Drawable` object:
+  * {{{
+  * AlertDialogBuilder(…, title = "My Title" withIcon R.drawable.my_icon)
+  *
+  * val icon: Drawable = …
+  * AlertDialogBuilder(…, title = "My Title" withIcon icon)
+  * }}}
+  *
+  * === Custom view titles ===
+  *
+  * In order to use a custom view, simply pass it as the argument for the
+  * title as follows:
+  *
+  * {{{
+  * val myTitleView: View = …
+  * AlertDialogBuilder(…, title = myTitleView)
+  * }}}
+  *
+  * == Specifying the buttons ==
+  *
+  * Android supports up to three buttons, which can be specified by the
+  * parameters `positiveButton`, `neutralButton`, and `negativeButton`.  The
+  * name for each button has no particular meaning, it is used primarily to
+  * differentiate between the three.
+  *
+  * Each button requires some text either passed in directly or as a reference
+  * to a string resource ID:
+  *
+  * {{{
+  * // as a string
+  * AlertDialog(…, positiveButton = "Yes")
+  *
+  * // as a resource ID
+  * AlertDialog(…, negativeButton = )
+  * }}}
+  *
+  *
+  * Additionally, each button supports an on-click callback that can be
+  * passed in either as a function with the signature `(DialogInterface,
+  * Int) => Unit` or as instance of `DialogInterface.OnClickListener`.  These
+  * can be passed to the builder using `onClick` as follows:
+  *
+  * {{{
+  * val listener: DialogInterface.OnClickListener = …
+  *
+  * AlertDialog(…,
+  *   // as listener object
+  *   positiveButton = R.string.yes_please onClick listener,
+  *
+  *   // as a function
+  *   negativeButton = "No, Thanks" onClick { (_, _) =>
+  *     // do something!
+  *   })
+  * }}}
+  *
+  * == Other settings ==
+  *
+  * You can also set the following additional settings:
+  *
+  * <ul>
+  *   <li>`cancellable`: whether or not the user can cancel the dialogue,
+  *   defaults to true</li>
+  * </ul>
+  *
+  *
+  * = Using the dialogue =
+  *
+  * Once you have created your dialogue, there are two ways to use it.
+  *
+  * <ol>
+  *   <li>You  can use the `create` method to get access to a built
+  *   `AlertDialog` object you can further customise.</li>
+  *   <li>You can use the `show()` method to construct and show the
+  *   dialogue all in one go.</li>
+  * </ol>
+  *
+  * @todo Add functionality fo
+  *
   * @author Daniel Solano Gómez
   */
 object AlertDialogBuilder {
-  /** Creates a new alert dialogue builder.
+  /** Creates a new alert dialogue builder.  See the object documentation for
+    *  more information on how to use this method.
     *
     * @param context the context for this builder and the `AlertDialog` it
     * creates.  Must not be `null`.
+    * @param content the contents of the dialogue.  Please see the
+    * documentation for the object about the different ways to specify content
+    * @param title an optional title for the dialogue
+    * @param positiveButton an optional positive button for the dialogue
+    * @param neutralButton an optional neutral button for the dialogue
+    * @param negativeButton an optional negative button for the dialogue
+    * @param cancellable whether or not the user may cancel the dialogue,
+    * defaults to true
     */
   def apply(
     context: Context,
@@ -80,7 +221,8 @@ object AlertDialogBuilder {
     title: Title = NoOp,
     positiveButton: Button = NoButton,
     neutralButton: Button = NoButton,
-    negativeButton: Button = NoButton
+    negativeButton: Button = NoButton,
+    cancellable: Boolean = true
   )(
     implicit factory: BuilderFactory
   ): AlertDialogBuilder = {
@@ -91,7 +233,7 @@ object AlertDialogBuilder {
       newButtonFunctor(neutralButton, NeutralButton),
       newButtonFunctor(negativeButton, NegativeButton)
     )
-    new AlertDialogBuilder(context, factory, actions)
+    new AlertDialogBuilder(context, factory, actions, cancellable)
   }
 
   /** Handy name for the underlying builder type. */
