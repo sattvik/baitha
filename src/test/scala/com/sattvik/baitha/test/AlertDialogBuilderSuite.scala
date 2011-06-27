@@ -19,6 +19,7 @@ package com.sattvik.baitha.test
 import android.app.AlertDialog
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.widget.ListAdapter
 import org.mockito.Mockito._
 import org.mockito.Matchers
 import org.mockito.Matchers._
@@ -27,7 +28,6 @@ import com.sattvik.baitha.AlertDialogBuilder
 import com.sattvik.baitha.AlertDialogBuilder._
 import com.sattvik.baitha.test.AlertDialogBuilderSuite._
 import android.content.{DialogInterface, Context}
-import org.mockito.Matchers
 
 /** Test suite for the AlertDialogBuilder utility.
   *
@@ -247,10 +247,10 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     AlertDialogBuilder(
       context,
       messageString,
-      positiveButton = positiveButtonId onClick positiveListener
+      positiveButton = positiveButtonId onClick onClickListener
     )(mockFactory)
 
-    verify(builder).setPositiveButton(positiveButtonId, positiveListener)
+    verify(builder).setPositiveButton(positiveButtonId, onClickListener)
   }
 
   /** Tests adding a positive button based on a resource ID along with a
@@ -322,10 +322,10 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     AlertDialogBuilder(
       context,
       messageString,
-      neutralButton = neutralButtonId onClick neutralListener
+      neutralButton = neutralButtonId onClick onClickListener
     )(mockFactory)
 
-    verify(builder).setNeutralButton(neutralButtonId, neutralListener)
+    verify(builder).setNeutralButton(neutralButtonId, onClickListener)
   }
 
   /** Tests adding a neutral button based on a resource ID along with a
@@ -397,10 +397,10 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     AlertDialogBuilder(
       context,
       messageString,
-      negativeButton = negativeButtonId onClick negativeListener
+      negativeButton = negativeButtonId onClick onClickListener
     )(mockFactory)
 
-    verify(builder).setNegativeButton(negativeButtonId, negativeListener)
+    verify(builder).setNegativeButton(negativeButtonId, onClickListener)
   }
 
   /** Tests adding a negative button based on a resource ID along with a
@@ -465,6 +465,97 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
 
     verify(builder).setCancelable(true)
   }
+
+  /** Tests the basic use case of having an adapter for content. */
+  def testAdapterContent() {
+    AlertDialogBuilder(
+      context,
+      adapter
+    )(mockFactory)
+
+    verify(builder).setAdapter(adapter, null)
+  }
+
+  /** Trying to use a null adapter should fail. */
+  def testNullAdapterContent() {
+    val nullAdapter: ListAdapter = null
+
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        nullAdapter
+      )(mockFactory)
+    }
+  }
+
+  /** Tests the use case of having an adapter for content and a listener
+    * object. */
+  def testAdapterContentWithListener() {
+    AlertDialogBuilder(
+      context,
+      adapter onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setAdapter(adapter, onClickListener)
+  }
+
+  /** Tests the use case of using an adapter for content with a handler
+    * function. */
+  def testAdapterContentWithFunction() {
+    AlertDialogBuilder(
+      context,
+      adapter onClick onClickFn
+    )(mockFactory)
+
+    verify(builder).setAdapter(
+      Matchers.eq(adapter),
+      isA(classOf[DialogInterface.OnClickListener]))
+  }
+
+  /** Tests the case of having an adapter for content with a selected item. */
+  def testAdapterContentWithCheckedItem() {
+    AlertDialogBuilder(
+      context,
+      adapter withSingleChoice adapterCheckedItem
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(adapter, adapterCheckedItem, null)
+  }
+
+  /** Tests the case of having an adapter for content with a selected item. */
+  def testAdapterContentWithBadCheckedItem() {
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        adapter withSingleChoice -2
+      )(mockFactory)
+    }
+  }
+
+  /** Tests the case of having an adapter for content with a selected item
+    * and a listener. */
+  def testAdapterContentWithCheckedItemAndListener() {
+    AlertDialogBuilder(
+      context,
+      adapter withSingleChoice adapterCheckedItem onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(
+      adapter,
+      adapterCheckedItem,
+      onClickListener)
+  }
+
+  /** Tests the case of having an adapter for content that supports a single
+    * choice with no checked item and a listener. */
+  def testAdapterContentWithNoCheckedItemAndListener() {
+    AlertDialogBuilder(
+      context,
+      adapter withSingleChoice() onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(adapter, -1, onClickListener)
+  }
 }
 
 /** Constants for use by the `AlertDialogBuilderSuite` test suite.
@@ -491,20 +582,20 @@ object AlertDialogBuilderSuite {
   val positiveButtonId = android.R.string.yes
   /** String for positive button. */
   val positiveButtonString = "Yes"
-  /** A listener for positive button click events. */
-  val positiveListener = mock(classOf[DialogInterface.OnClickListener])
   /** Resource ID for neutral button. */
   val neutralButtonId = android.R.string.cancel
   /** String for neutral button. */
   val neutralButtonString = "Maybe"
-  /** A listener for neutral button click events. */
-  val neutralListener = mock(classOf[DialogInterface.OnClickListener])
   /** Resource ID for negative button. */
   val negativeButtonId = android.R.string.no
   /** String for negative button. */
   val negativeButtonString = "No"
   /** A listener for negative button click events. */
-  val negativeListener = mock(classOf[DialogInterface.OnClickListener])
+  val onClickListener = mock(classOf[DialogInterface.OnClickListener])
   /** An on-click handler function. */
   val onClickFn = {(_: DialogInterface, _: Int) => }
+  /** A mock adapter to be used for content. */
+  val adapter = mock(classOf[ListAdapter])
+  /** The checked item for a single choice adapter. */
+  val adapterCheckedItem = 3
 }

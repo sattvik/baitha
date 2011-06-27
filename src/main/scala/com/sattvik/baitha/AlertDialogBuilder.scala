@@ -21,6 +21,7 @@ import android.content.{DialogInterface, Context}
 import android.content.DialogInterface.OnClickListener
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.widget.ListAdapter
 import com.sattvik.baitha.AlertDialogBuilder.{DialogueFunctor, BuilderFactory}
 
 /** Builds or shows an alert dialogue from the arguments passed in to the
@@ -91,8 +92,13 @@ class AlertDialogBuilder private(
   *
   * == Specifying content ==
   *
-  * Currently, only message-type content is supported.  You can specify the
-  * message as a string or as resource ID reference to a string, as follows:
+  * Android's dialogue builder fundamentally supports three different types of
+  * dialogue content: messages, lists, and custom views.
+  *
+  * === Message content ===
+  *
+  * Message content consists of a string of text that can be specified either
+  * as a string or as resource ID reference to a string, as follows:
   *
   * {{{
   * // using a string
@@ -100,6 +106,69 @@ class AlertDialogBuilder private(
   *
   * // using a resource ID
   * AlertDialogBuilder(context, R.string.message)
+  * }}}
+  *
+  * === List content ===
+  *
+  * Android supports showing dialogues that present a list as their content.
+  * Generally, these lists work in three different modes:
+  *
+  * <ol>
+  *   <li>''Default mode'': In this mode, the items are shown in a simple list.
+  *   As soon as the user selects an item, the dialogue is dismissed.  An
+  *   `OnClickListener` or handler function is used to notify of the result
+  *   of the selection.</li>
+  *   <li>''Single choice mode'': In this mode, the items are shown with a
+  *   check mark displayed next to the text of the selected item.  Clicking on
+  *   an item on the list will not dismiss the dialogue.  Instead, you should
+  *   provide at least one button to allow the user to dismiss the dialogue.
+  *   </li>
+  * </ol>
+  *
+  * In addition, the source of the items for the list may come from one of the
+  * following:
+  *
+  * <ul>
+  *   <li>A `ListAdapter` object</li>
+  * </ul>
+  *
+  * ==== Choice modes and callbacks ====
+  *
+  * All list content starts out in the default mode.  You can enable either
+  * single-choice or multiple-choice modes by calling `withSingleChoice` or
+  * `withMultipleChoices` respectively.  Naturally, the two are mutually
+  * incompatible.
+  *
+  * Additionally, the callback for the default and single-choice modes is an
+  * `DialogInterface.OnClickListener` or compatible function, which can be set
+  * using `onClick`.  For multiple-choice mode, the callback is
+  * `DialogInterface.OnMultiClickListener`, which is set using `onMultiClick`.
+  *
+  * ==== `ListAdapter`-based content ====
+  *
+  * Dialogue content backed by a `ListAdapter` can operate in either default or
+  * single-choice modes.  To enable single-choice mode, add a call to
+  * `withSingleChoice(Int)`.  The argument to `withSingleChoice` is optional,
+  * and if left out will cause the dialogue to be in single-choice mode with
+  * no checked items.
+  *
+  * Examples:
+  *
+  * {{{
+  * val adapter: ListAdapter = …
+  *
+  * // default choice mode with no call-back given
+  * AlertDialogBuilder(context, adapter)
+  *
+  * // default choice mode a call-back given
+  * AlertDialogBuilder(context, adapter onClick {(_,_) =>})
+  *
+  * // single-choice mode, with item 2 checked (third item)
+  * AlertDialogBuilder(context, adapter withSingleChoice 2)
+  *
+  * // single-choice mode, no item checked, with call-back
+  * val listener: DialogInterface.OnClickListener = …
+  * AlertDialogBuilder(context, adapter withSingleChoice() onClick listener)
   * }}}
   *
   * == Specifying the title ==
@@ -277,6 +346,65 @@ object AlertDialogBuilder {
     }
   }
 
+  /** Uses the given adapter as the source for a list of items to be
+    * displayed as the dialogue content.
+    *
+    * By default, the dialogue will be dismissed and the listener (if set)
+    * will be notified once an item is clicked.  If `withSingleChoiceItem` has
+    * been called, then the list will be displayed with check marks next to
+    * each item and the dialogue will not be automatically dismissed.
+    *
+    * @param adapter the adapter to use as the source of the list
+    */
+  final class AdapterContent(adapter: ListAdapter) extends Content {
+    /** The listener to notify in the case of a selection or checking. */
+    var listener: Option[OnClickListener] = None
+    /** If set, the single item that should be checked where -1 signifies that
+      * no item will be checked though the list will support a single
+      * choice. */
+    var checkedItem: Option[Int] = None
+
+    require(adapter != null, "Adapter must not be null.")
+
+    /** Sets the listener for the list.  */
+    def onClick(l: OnClickListener): AdapterContent = {
+      if (l != null) {
+        listener = Some(l)
+      }
+      this
+    }
+
+    /** Specifies which item of the list is checked.  Once this method is
+      * called, the
+      *
+      * @param item optional, the item that should be checked.  If -1 or
+      * omitted, no item will be checked.
+      *
+      * @return the object for more building
+      */
+    def withSingleChoice(item: Int = -1): AdapterContent = {
+      require(
+        item >= -1,
+        "Checked item must be non-negative or -1 for no checked items")
+      checkedItem = Some(item)
+      this
+    }
+
+    /** Applies the adapter to the underlying Android builder. */
+    def apply(b: AndroidBuilder) {
+      if (checkedItem.isDefined) {
+        b.setSingleChoiceItems(adapter, checkedItem.get, listener.orNull)
+      } else {
+        b.setAdapter(adapter, listener.orNull)
+      }
+    }
+  }
+
+  /** Converts a `ListAdapter` to a content object. */
+  implicit def adapterToContent(adapter: ListAdapter): AdapterContent = {
+    new AdapterContent(adapter)
+  }
+
   /** The master trait for any title for an alert dialogue. */
   sealed trait Title extends DialogueFunctor
 
@@ -406,7 +534,7 @@ object AlertDialogBuilder {
   private def newButtonFunctor(
     button: Button,
     buttonType: ButtonType
-  ):  DialogueFunctor = {
+  ): DialogueFunctor = {
     button.message map {
       val listener = button.listener.orNull
       _ match {
