@@ -354,6 +354,8 @@ class AlertDialogBuilder private(
   *   generally automatically has an inverse background.  This seems to only
   *   have an effect when using a custom view for content.  Defaults to
   *   false</li>
+  *   <li>`onCancel`: adds a listener or function that will be executed if
+  *   the dialogue is cancelled.</li>
   * </ul>
   *
   *
@@ -410,7 +412,8 @@ object AlertDialogBuilder {
     neutralButton: Button = NoButton,
     negativeButton: Button = NoButton,
     cancellable: Boolean = true,
-    forceInverseBackground: Boolean = false
+    forceInverseBackground: Boolean = false,
+    onCancel: OnCancelListener = null
   )(
     implicit factory: BuilderFactory
   ): AlertDialogBuilder = {
@@ -423,7 +426,10 @@ object AlertDialogBuilder {
       { b: AndroidBuilder =>
         b.setInverseBackgroundForced(forceInverseBackground)
       },
-      { (_: AndroidBuilder).setCancelable(cancellable) }
+      { (_: AndroidBuilder).setCancelable(cancellable) },
+      { b: AndroidBuilder =>
+        if(onCancel != null) b.setOnCancelListener(onCancel) else b
+      }
     )
     new AlertDialogBuilder(context, factory, actions)
   }
@@ -435,6 +441,9 @@ object AlertDialogBuilder {
     * factory for the purposes of testing.
     */
   type BuilderFactory = Context => AndroidBuilder
+  /** Handy name for a function that can be converted into a
+    * `DialogInterface.OnCancelListener` */
+  type OnCancelFunction = DialogInterface => Unit
   /** Handy name for a function that can be converted into a
     * `DialogInterface.OnClickListener` */
   type OnClickFunction = (DialogInterface, Int) => Unit
@@ -1015,6 +1024,17 @@ object AlertDialogBuilder {
 
   /** A sensible default that does nothing. */
   object NoOp extends Title with NoOp
+
+  /** Converts an `OnCancelFunction` to an `OnCancelListener`. */
+  implicit def fnToOnCancelListener(fn: OnCancelFunction): OnCancelListener = {
+    whenNotNull(fn) {() =>
+      new OnCancelListener {
+        def onCancel(d: DialogInterface) {
+          fn(d)
+        }
+      }
+    }
+  }
 
   /** Converts an `OnClickFunction` to an `OnClickListener`. */
   implicit def fnToOnClickListener(fn: OnClickFunction): OnClickListener = {

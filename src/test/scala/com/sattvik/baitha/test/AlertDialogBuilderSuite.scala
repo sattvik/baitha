@@ -935,6 +935,35 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
       null,
       onMultiClickListener)
   }
+
+  /** Tests setting an on cancel listener. */
+  def testSetOnCancelListener() {
+    val listener = new DialogInterface.OnCancelListener {
+      def onCancel(dialog: DialogInterface) {}
+    }
+
+    AlertDialogBuilder(
+      context,
+      messageString,
+      onCancel = listener
+    )(mockFactory)
+
+    verify(builder).setOnCancelListener(listener)
+  }
+
+  /** Tests setting an on cancel listener with a function. */
+  def testSetOnCancelFunction() {
+    val function = {_: DialogInterface => }
+
+    AlertDialogBuilder(
+      context,
+      messageString,
+      onCancel = function
+    )(mockFactory)
+
+    verify(builder).setOnCancelListener(
+      isA(classOf[DialogInterface.OnCancelListener]))
+  }
 }
 
 /** Constants for use by the `AlertDialogBuilderSuite` test suite.
