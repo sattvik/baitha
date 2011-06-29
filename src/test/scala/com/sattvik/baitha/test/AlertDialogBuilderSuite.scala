@@ -28,6 +28,8 @@ import com.sattvik.baitha.AlertDialogBuilder
 import com.sattvik.baitha.AlertDialogBuilder._
 import com.sattvik.baitha.test.AlertDialogBuilderSuite._
 import android.content.{DialogInterface, Context}
+import android.database.Cursor
+import org.mockito.internal.matchers.InstanceOf
 
 /** Test suite for the AlertDialogBuilder utility.
   *
@@ -516,10 +518,10 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
   def testAdapterContentWithCheckedItem() {
     AlertDialogBuilder(
       context,
-      adapter withSingleChoice adapterCheckedItem
+      adapter withSingleChoice checkedItem
     )(mockFactory)
 
-    verify(builder).setSingleChoiceItems(adapter, adapterCheckedItem, null)
+    verify(builder).setSingleChoiceItems(adapter, checkedItem, null)
   }
 
   /** Tests the case of having an adapter for content with a selected item. */
@@ -537,12 +539,12 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
   def testAdapterContentWithCheckedItemAndListener() {
     AlertDialogBuilder(
       context,
-      adapter withSingleChoice adapterCheckedItem onClick onClickListener
+      adapter withSingleChoice checkedItem onClick onClickListener
     )(mockFactory)
 
     verify(builder).setSingleChoiceItems(
       adapter,
-      adapterCheckedItem,
+      checkedItem,
       onClickListener)
   }
 
@@ -555,6 +557,122 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setSingleChoiceItems(adapter, -1, onClickListener)
+  }
+
+  /** Tests the basic use case of having an cursor for content. */
+  def testCursorContent() {
+    AlertDialogBuilder(
+      context,
+      cursor withLabel labelColumn
+    )(mockFactory)
+
+    verify(builder).setCursor(cursor, null, labelColumn)
+  }
+
+  /** Trying to use a null cursor should fail. */
+  def testNullCursorContent() {
+    val nullCursor: Cursor = null
+
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        nullCursor withLabel labelColumn
+      )(mockFactory)
+    }
+  }
+
+  /** Trying to use a cursor with a null label column should fail. */
+  def testCursorContentNullLabel() {
+    val nullLabel: String = null
+
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        cursor withLabel nullLabel
+      )(mockFactory)
+    }
+  }
+
+  /** Tests using a cursor with a listener. */
+  def testCursorContentWithListener() {
+    AlertDialogBuilder(
+      context,
+      cursor withLabel labelColumn onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setCursor(cursor, onClickListener, labelColumn)
+  }
+
+  /** Tests using a cursor with single-choice mode. */
+  def testCursorContentWithSingleChoice() {
+    AlertDialogBuilder(
+      context,
+      cursor withLabel labelColumn withSingleChoice checkedItem
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(
+      cursor, checkedItem,  labelColumn, null)
+  }
+
+  /** Tests using a cursor with single-choice mode and a listener. */
+  def testCursorContentWithSingleChoiceAndListener() {
+    AlertDialogBuilder(
+      context,
+      cursor withLabel labelColumn withSingleChoice() onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(
+      cursor, -1,  labelColumn, onClickListener)
+  }
+
+  /** Tests using a cursor with multiple-choice mode. */
+  def testCursorContentWithMultipleChoice() {
+    AlertDialogBuilder(
+      context,
+      cursor withLabel labelColumn withMultipleChoices checkedColumn
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(
+      cursor, checkedColumn,  labelColumn, null)
+  }
+
+  /** Trying to use a null multiple choice label should fail. */
+  def testCursorContentWithNullMultipleChoiceLabel() {
+    val nullLabel: String = null
+
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        cursor withLabel labelColumn withMultipleChoices nullLabel
+      )(mockFactory)
+    }
+  }
+
+  /** Tests using a cursor with multiple-choice mode and a listener. */
+  def testCursorContentWithMultipleChoiceAndListener() {
+    AlertDialogBuilder(
+      context,
+      cursor withLabel labelColumn withMultipleChoices checkedColumn
+          onMultiChoiceClick onMultiClickListener
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(
+      cursor, checkedColumn,  labelColumn, onMultiClickListener)
+  }
+
+  /** Tests using a cursor with multiple-choice mode and a handler function. */
+  def testCursorContentWithMultipleChoiceAndHandlerFunction() {
+    AlertDialogBuilder(
+      context,
+      cursor withLabel labelColumn withMultipleChoices checkedColumn
+          onMultiChoiceClick onMultiClickFn
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(
+      Matchers.eq(cursor),
+      Matchers.eq(checkedColumn),
+      Matchers.eq(labelColumn),
+      isA(classOf[DialogInterface.OnMultiChoiceClickListener]))
   }
 }
 
@@ -590,12 +708,22 @@ object AlertDialogBuilderSuite {
   val negativeButtonId = android.R.string.no
   /** String for negative button. */
   val negativeButtonString = "No"
-  /** A listener for negative button click events. */
+  /** A listener for click events. */
   val onClickListener = mock(classOf[DialogInterface.OnClickListener])
   /** An on-click handler function. */
   val onClickFn = {(_: DialogInterface, _: Int) => }
   /** A mock adapter to be used for content. */
   val adapter = mock(classOf[ListAdapter])
   /** The checked item for a single choice adapter. */
-  val adapterCheckedItem = 3
+  val checkedItem = 3
+  /** A mock cursor to be used for content. */
+  val cursor = mock(classOf[Cursor])
+  /** The label column for the cursor. */
+  val labelColumn = "label"
+  /** The label column for the cursor. */
+  val checkedColumn = "isChecked"
+  /** A listener for multi-click events. */
+  val onMultiClickListener =
+    mock(classOf[DialogInterface.OnMultiChoiceClickListener])
+  val onMultiClickFn = {(_:DialogInterface, _: Int, _:Boolean) => }
 }

@@ -18,7 +18,8 @@ package com.sattvik.baitha
 
 import android.app.AlertDialog
 import android.content.{DialogInterface, Context}
-import android.content.DialogInterface.OnClickListener
+import android.content.DialogInterface._
+import android.database.Cursor
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.ListAdapter
@@ -130,6 +131,7 @@ class AlertDialogBuilder private(
   *
   * <ul>
   *   <li>A `ListAdapter` object</li>
+  *   <li>A `Cursor` object</li>
   * </ul>
   *
   * ==== Choice modes and callbacks ====
@@ -142,7 +144,8 @@ class AlertDialogBuilder private(
   * Additionally, the callback for the default and single-choice modes is an
   * `DialogInterface.OnClickListener` or compatible function, which can be set
   * using `onClick`.  For multiple-choice mode, the callback is
-  * `DialogInterface.OnMultiClickListener`, which is set using `onMultiClick`.
+  * `DialogInterface.OnMultiChoiceClickListener`, which is set using
+  * `onMultiChoiceClick`.
   *
   * ==== `ListAdapter`-based content ====
   *
@@ -169,6 +172,48 @@ class AlertDialogBuilder private(
   * // single-choice mode, no item checked, with call-back
   * val listener: DialogInterface.OnClickListener = …
   * AlertDialogBuilder(context, adapter withSingleChoice() onClick listener)
+  * }}}
+  *
+  * ==== `Cursor`-based content ====
+  *
+  * Dialogue content backed by a `Cursor` can operate in all three modes.
+  *
+  * To enable single-choice mode, add a call to `withSingleChoice(Int)`.  The
+  * argument to `withSingleChoice` is optional, and if left out will cause the
+  * dialogue to be in single-choice mode with no checked items.  Note that
+  * using `withSingleChoice` without arguments requires parentheses if there
+  * are any following settings.
+  *
+  * To enable multiple-choice mode, add a call to
+  * `withMultipleChoices(String)`.  The argument is mandatory and is the name
+  * of the column within the cursor that determines if an item is checked or
+  * not.  The column must return an integer value where 1 means checked and 0
+  * means unchecked.
+  *
+  * Examples:
+  *
+  * {{{
+  * val cursor: Cursor = …
+  *
+  * // default choice mode with no call-back given
+  * AlertDialogBuilder(context, cursor)
+  *
+  * // default choice mode a call-back given
+  * AlertDialogBuilder(context, cursor onClick {(_,_) =>})
+  *
+  * // single-choice mode, with item 2 checked (third item)
+  * AlertDialogBuilder(context, cursor withSingleChoice 2)
+  *
+  * // single-choice mode, no item checked, with call-back
+  * val listener: DialogInterface.OnClickListener = …
+  * AlertDialogBuilder(context, cursor withSingleChoice() onClick listener)
+  *
+  * // multiple-choice mode
+  * AlertDialogBuilder(context, cursor withMultipleChoices "enabled"
+  *
+  * // multiple-choice mode, with a call-back
+  * AlertDialogBuilder(context, cursor withMultipleChoices "enabled"
+  *   onMultiChoiceClick {(_,_,_) => // do something})
   * }}}
   *
   * == Specifying the title ==
@@ -315,6 +360,9 @@ object AlertDialogBuilder {
   /** Handy name for a function that can be converted into a
     * `DialogInterface.OnClickListener` */
   type OnClickFunction = (DialogInterface, Int) => Unit
+  /** Handy name for a function that can be converted into a
+    * `DialogInterface.OnMultiChoiceClickListener` */
+  type OnMultiChoiceClickFunction = (DialogInterface, Int, Boolean) => Unit
 
   /** The default `BuilderFactory`, which simply creates a new
     * `AlertDialog.Builder` object using the given context. */
@@ -347,6 +395,51 @@ object AlertDialogBuilder {
     }
   }
 
+  /** Provides a `withSingleChoice` method that can be used to set some list
+    * content into single-choice mode.
+    *
+    * @tparam T a return type for the `withSingleChoice` method */
+  sealed trait SingleChoice[T <: Content] extends OnClick[T] with Content {
+    /** If set, the single item that should be checked where -1 signifies that
+      * no item will be checked though the list will support a single
+      * choice. */
+    var _checkedItem: Option[Int] = None
+
+    /** Returns the value of the checked item, if set. */
+    protected def checkedItem: Int = _checkedItem.get
+
+    /** Returns true if the single choice has been selected. */
+    protected def singleChoiceDefined: Boolean = _checkedItem.isDefined
+
+    /** Specifies which item of the list is checked.  Once this method is
+      * called, the list will be in single-choice mode.
+      *
+      * @param item optional, the item that should be checked.  If -1 or
+      * omitted, no item will be checked.
+      *
+      * @return the object for more building
+      */
+    def withSingleChoice(item: Int = -1): T = {
+      require(
+        item >= -1,
+        "Checked item must be non-negative or -1 for no checked items")
+      _checkedItem = Some(item)
+      this.asInstanceOf[T]
+    }
+
+    /** Applies the builder using either `defaultApply` or `singleChoiceApply`
+      * depending on whether or not single choice mode has been activated. */
+    def apply(b: AndroidBuilder) {
+      if(_checkedItem.isDefined) singleChoiceApply(b) else defaultApply(b)
+    }
+
+    /** Like `apply`, but for the default mode. */
+    protected def defaultApply(b: AndroidBuilder)
+
+    /** Like `apply`, but for single-choice mode. */
+    protected def singleChoiceApply(b: AndroidBuilder)
+  }
+
   /** Converts a character sequence into content for the dialogue. */
   implicit def charSeqToContent(text: CharSequence): Content = {
     require(text != null, "Message must not be null.")
@@ -376,44 +469,123 @@ object AlertDialogBuilder {
     *
     * @param adapter the adapter to use as the source of the list
     */
-  final class AdapterContent(adapter: ListAdapter)
-      extends Content with OnClick[AdapterContent] {
-    /** If set, the single item that should be checked where -1 signifies that
-      * no item will be checked though the list will support a single
-      * choice. */
-    var checkedItem: Option[Int] = None
-
+  final class AdapterContent(adapter: ListAdapter) extends Content
+              with OnClick[AdapterContent]
+              with SingleChoice[AdapterContent] {
     require(adapter != null, "Adapter must not be null.")
 
-    /** Specifies which item of the list is checked.  Once this method is
-      * called, the
-      *
-      * @param item optional, the item that should be checked.  If -1 or
-      * omitted, no item will be checked.
-      *
-      * @return the object for more building
-      */
-    def withSingleChoice(item: Int = -1): AdapterContent = {
-      require(
-        item >= -1,
-        "Checked item must be non-negative or -1 for no checked items")
-      checkedItem = Some(item)
-      this
+    def defaultApply(b: AndroidBuilder) {
+      b.setAdapter(adapter, listener)
     }
 
-    /** Applies the adapter to the underlying Android builder. */
-    def apply(b: AndroidBuilder) {
-      if (checkedItem.isDefined) {
-        b.setSingleChoiceItems(adapter, checkedItem.get, listener)
-      } else {
-        b.setAdapter(adapter, listener)
-      }
+    def singleChoiceApply(b: AndroidBuilder) {
+      b.setSingleChoiceItems(adapter, checkedItem, listener)
     }
   }
 
   /** Converts a `ListAdapter` to a content object. */
   implicit def adapterToContent(adapter: ListAdapter): AdapterContent = {
     new AdapterContent(adapter)
+  }
+
+  /** This creates an intermediate object into which a cursor can be stored
+    * before it gets a label.  This also causes compilation to fail if a
+    * cursor is passed as content without an immediate cann to `withLabel`.
+    *
+    * @param cursor the cursor to wrap */
+  final class UnlabelledCursor(cursor: Cursor) {
+    require(cursor != null, "Cursor may not be null.")
+
+    /** Creates a content object for the cursor using the given string as the
+      * name of the column for the labels. */
+    def withLabel(label: String): DefaultCursorContent = {
+      new DefaultCursorContent(cursor, label)
+    }
+  }
+
+  /** Holds the basic information for concrete cursor content implementations.
+    *
+    * @param cursor the underlying cursor to use as the source for the list
+    * @param labelColumn the name of the column whose text should be used for
+    * the items in the list */
+  sealed abstract class CursorContent(
+    protected val cursor: Cursor,
+    protected val labelColumn: String
+  ) extends Content {
+    require(cursor != null, "Cursor may not be null.")
+    require(labelColumn != null, "Label may not be null.")
+
+    /** Essentially, a copy constructor. */
+    protected def this(c: CursorContent) = this(c.cursor, c.labelColumn)
+  }
+
+  /** Basic class for list content backed by a cursor.  This class supports
+    * both the default and single-choice selection methods.
+    */
+  final class DefaultCursorContent(cursor: Cursor, labelColumn: String)
+      extends CursorContent(cursor, labelColumn)
+              with SingleChoice[DefaultCursorContent] {
+
+    /** Changes the list to multi-choice mode using the given column name as
+      * the source for whether or not an item is checked.
+      *
+      * @param isCheckedColumn specifies the column name on the cursor to use
+      * to determine whether a checkbox is checked or not. It must return an
+      * integer value where 1 means checked and 0 means unchecked.
+      */
+    def withMultipleChoices(
+      isCheckedColumn: String
+    ): MultipleChoiceCursorContent = {
+      new MultipleChoiceCursorContent(this, isCheckedColumn)
+    }
+
+    def defaultApply(b: AndroidBuilder) {
+      b.setCursor(cursor, listener, labelColumn)
+    }
+
+    def singleChoiceApply(b: AndroidBuilder) {
+      b.setSingleChoiceItems(cursor, checkedItem, labelColumn, listener)
+    }
+  }
+
+  /** Implements the multiple-choice mode for a list backed by a cursor.
+    *
+    * @param content an instance of cursor content used to get the cursor and
+    * label string
+    * @param isCheckedColumn the column name on the cursor used to determine
+    * whether a checkbox is checked or not.
+    */
+  final class MultipleChoiceCursorContent(
+    content: CursorContent,
+    isCheckedColumn: String
+  ) extends CursorContent(content) {
+    /** The optional listener for multi-choice clicks. */
+    private var listener: Option[OnMultiChoiceClickListener] = None
+
+    require(isCheckedColumn != null)
+
+    /** Sets the listener for multi-choice clicks. */
+    def onMultiChoiceClick(
+      l: OnMultiChoiceClickListener
+    ):  MultipleChoiceCursorContent = {
+      if(l != null) {
+        listener = Some(l)
+      }
+      this
+    }
+
+    def apply(b: AndroidBuilder) {
+      b.setMultiChoiceItems(
+        cursor,
+        isCheckedColumn,
+        labelColumn,
+        listener.orNull)
+    }
+  }
+
+  /** Converts a `Cursor` to a content object. */
+  implicit def cursorToContent(cursor: Cursor): UnlabelledCursor = {
+    new UnlabelledCursor(cursor)
   }
 
   /** The master trait for any title for an alert dialogue. */
@@ -598,8 +770,21 @@ object AlertDialogBuilder {
   implicit def fnToOnClickListener(fn: OnClickFunction): OnClickListener = {
     whenNotNull(fn) {() =>
       new DialogInterface.OnClickListener {
-        def onClick(dialog: DialogInterface, button: Int) {
-          fn(dialog, button)
+        def onClick(dialogue: DialogInterface, button: Int) {
+          fn(dialogue, button)
+        }
+      }
+    }
+  }
+
+  /** Converts an `OnMultiChoiceClickFunction` to an `OnMultiChoiceClickListener`. */
+  implicit def fnToOnMultiChoiceClickListener(
+    fn: OnMultiChoiceClickFunction
+  ):  OnMultiChoiceClickListener = {
+    whenNotNull(fn) {() =>
+      new OnMultiChoiceClickListener {
+        def onClick(p1: DialogInterface, p2: Int, p3: Boolean) {
+          fn(p1, p2, p3)
         }
       }
     }
