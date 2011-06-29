@@ -130,6 +130,7 @@ class AlertDialogBuilder private(
   * <ul>
   *   <li>A `ListAdapter` object</li>
   *   <li>A `Cursor` object</li>
+  *   <li>Arrays based on resource IDs or passed in directly</li>
   * </ul>
   *
   * ==== Choice modes and callbacks ====
@@ -211,6 +212,60 @@ class AlertDialogBuilder private(
   *
   * // multiple-choice mode, with a call-back
   * AlertDialogBuilder(context, cursor withMultipleChoices "enabled"
+  *   onMultiChoiceClick {(_,_,_) => // do something})
+  * }}}
+  *
+  * ==== Array-based content ====
+  *
+  * Dialogue content backed by an can operate in all three modes.  The array
+  * can be passed directly the builder, or it can be read from an array
+  * resource ID.  In order to disambiguate from an ID for a message,
+  * you should append `.asList` to the resource ID you pass in, as follows:
+  *
+  * {{{
+  * // interpreted as a string message
+  * AlertDialogBuilder(context, R.string.my_message)
+  *
+  * // interpreted as an array
+  * AlertDialogBuilder(context, R.array.list_of_goodies.asList)
+  * }}}
+  *
+  * To enable single-choice mode, add a call to `withSingleChoice(Int)`.  The
+  * argument to `withSingleChoice` is optional, and if left out will cause the
+  * dialogue to be in single-choice mode with no checked items.  Note that
+  * using `withSingleChoice` without arguments requires parentheses if there
+  * are any following settings.
+  *
+  * To enable multiple-choice mode, add a call to
+  * `withMultipleChoices(Traversable[Boolean])` where the argument is
+  * optional.  If omitted, then no items will be checked, and you should place
+  * empty parentheses after the `withMultipleChoices`.  If supplied, the
+  * length of collection should be the same as the length of the array
+  * backing the list.
+  *
+  * Examples:
+  *
+  * {{{
+  * // default choice mode, using the given array
+  * AlertDialogBuilder(context, Array("one", "two", "foo"))
+  *
+  * // default choice mode a call-back given, using a resource ID
+  * AlertDialogBuilder(context, R.array.goodies.asList onClick {(_,_) =>})
+  *
+  * // single-choice mode, with "foo" checked
+  * val items = Array("one", "two", "foo")
+  * AlertDialogBuilder(context, items withSingleChoice 2)
+  *
+  * // single-choice mode, no item checked, with call-back
+  * val listener: DialogInterface.OnClickListener = …
+  * AlertDialogBuilder(context, items withSingleChoice() onClick listener)
+  *
+  * // multiple-choice mode, with "one" ahd "foo" checked
+  * val checked = Array(true, false, true)
+  * AlertDialogBuilder(context, items withMultipleChoices checked
+  *
+  * // multiple-choice mode, with a call-back, and no items checked
+  * AlertDialogBuilder(context, R.array.goodies.asList withMultipleChoices()
   *   onMultiChoiceClick {(_,_,_) => // do something})
   * }}}
   *
@@ -398,23 +453,42 @@ object AlertDialogBuilder {
   /** The type for all content of an alert dialogue. */
   sealed trait Content extends DialogueFunctor
 
+  /** Generic implementation of having a listener.
+    *
+    * @tparam ContentType what to return for `setCallback`
+    * @tparam ListenerType the type of listener to support */
+  sealed trait WithListener[ContentType, ListenerType] {
+    /** The listener, if set. */
+    private var _listener: Option[ListenerType] = None
+
+    /** Returns either the listener or null. */
+    def listener: ListenerType = {
+      _listener.getOrElse(null.asInstanceOf[ListenerType])
+    }
+
+    /** Sets the listener, if not null. */
+    protected def setCallback(l: ListenerType): ContentType = {
+      if (l != null) {
+        _listener = Some(l)
+      }
+      this.asInstanceOf[ContentType]
+    }
+  }
+
   /** Provides an `onClick` method that can be used to set an `OnClickListener`
     * option.
     *
     * @tparam T a return type for the `onClick` method */
-  sealed trait OnClick[T] {
-    /** The listener, if set. */
-    private var _listener: Option[OnClickListener] = None
-
-    /** Returns either the listener or null. */
-    def listener: OnClickListener = _listener.orNull
-
+  sealed trait OnClick[T] extends WithListener[T, OnClickListener] {
     /** Sets the listener for the list.  */
-    def onClick(l: OnClickListener): T = {
-      if (l != null) {
-        _listener = Some(l)
-      }
-      this.asInstanceOf[T]
+    def onClick(l: OnClickListener): T = setCallback(l)
+  }
+
+  sealed trait OnMultiChoiceClick[T]
+      extends WithListener[T, OnMultiChoiceClickListener] {
+    /** Sets the listener for the list.  */
+    def onMultiChoiceClick(l: OnMultiChoiceClickListener): T = {
+      setCallback(l)
     }
   }
 
@@ -611,6 +685,90 @@ object AlertDialogBuilder {
     new UnlabelledCursor(cursor)
   }
 
+  /** Parent class to all array-based list-type content.
+    *
+    * @tparam T the type of the underlying source for the array
+    *
+    * @param source the underlying source of the array */
+  sealed abstract class ArrayContent[T](protected val source: T)
+      extends Content {
+    /** A basic copy constructor. */
+    def this(content: ArrayContent[T]) = this(content.source)
+  }
+
+  /** Parent class for array content that is either in default choice or
+    * multiple choice mode.
+    *
+    * @tparam T the type of the underlying source for the array
+    *
+    * @param source the underlying source of the array */
+  sealed abstract class DefaultArrayContent[T](source: T)
+      extends ArrayContent[T](source)
+              with SingleChoice[DefaultArrayContent[T]] {
+    /** Allows using the array in multiple-choice mode.
+      *
+      * @param choices specifies which items are checked.  If omitted then no
+      * items will be checked.  Otherwise, must be the same length as the
+      * array of items.
+      *
+      * @return a multiple-choice version of this array content */
+    def withMultipleChoices(
+      choices: Traversable[Boolean] = null
+    ): MultipleChoiceArrayContent[T] = {
+      toMultipleChoice(if(choices == null) None else Some(choices.toArray))
+    }
+
+    /** Returns a multiple-choice version of this content with the given
+      * choice selections. */
+    def toMultipleChoice(
+      choices: Option[Array[Boolean]]
+    ): MultipleChoiceArrayContent[T]
+  }
+
+  /** A multiple-choice version of array content.
+    *
+    * @constructor Generates a multiple-choice version of the given array
+    * content.
+    *
+    * @param content the content upon which the new object is based
+    * @param choices an optional set of checked items in the list
+    */
+  sealed abstract class MultipleChoiceArrayContent[T](
+    content: ArrayContent[T],
+    choices: Option[Array[Boolean]]
+  ) extends ArrayContent[T](content)
+            with  OnMultiChoiceClick[MultipleChoiceArrayContent[T]] {
+    /** Returns the array of checked items for the list. */
+    protected def checkedItems = choices.orNull
+  }
+
+  /** Array content based on the given array resource ID. */
+  final class ArrayResourceContent(id: Int) extends DefaultArrayContent(id) {
+    protected def defaultApply(b: AndroidBuilder) {
+      b.setItems(id, listener)
+    }
+
+    protected def singleChoiceApply(b: AndroidBuilder) {
+      b.setSingleChoiceItems(id, checkedItem, listener)
+    }
+
+    def toMultipleChoice(
+      choices: Option[Array[Boolean]]
+    ): MultipleChoiceArrayContent[Int] = {
+      new MultipleChoiceArrayResourceContent(this, choices)
+    }
+  }
+
+  /** Multiple-choice array content based on an array resource ID. */
+  final class MultipleChoiceArrayResourceContent(
+    content: ArrayResourceContent,
+    choices: Option[Array[Boolean]]
+  ) extends MultipleChoiceArrayContent(content, choices) {
+    def apply(b: AndroidBuilder) {
+      b.setMultiChoiceItems(source, checkedItems, listener)
+    }
+  }
+
   /** The master trait for any title for an alert dialogue. */
   sealed trait Title extends DialogueFunctor
 
@@ -644,15 +802,23 @@ object AlertDialogBuilder {
     }
   }
 
-  /** Converts an integer, presumably a resource ID, into the message portion
-    * of a regular title. */
-  implicit def idToRegularTitle(id: Int): RegularTitle = {
-    new RegularTitle {
-      override def apply(builder: AndroidBuilder) {
-        builder.setTitle(id)
-        super.apply(builder)
-      }
+  /** Generic resource content that defaults to being a message, but can be
+    * converted as a list as well. */
+  final class ResourceContent(val id: Int) extends RegularTitle {
+    /** Changes this content type from being interpreted as a message to
+      * being interpreted as a list. */
+    def asList: ArrayResourceContent = new ArrayResourceContent(id)
+
+    override def apply(builder: AndroidBuilder) {
+      builder.setTitle(id)
+      super.apply(builder)
     }
+  }
+
+  /** Converts an integer, presumably a resource ID, into content that is
+    * interpreted as a regular title, but can also be turned into an array. */
+  implicit def idToResourceContent(id: Int): ResourceContent = {
+    new ResourceContent(id)
   }
 
   /** Converts a character sequence into the message portion of a regular

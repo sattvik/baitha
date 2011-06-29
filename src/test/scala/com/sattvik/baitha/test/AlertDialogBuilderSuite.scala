@@ -697,6 +697,83 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
 
     verify(builder).setInverseBackgroundForced(false)
   }
+
+  /** Tests using an array resource ID for content. */
+  def testArrayResourceContent() {
+    AlertDialogBuilder(
+      context,
+      arrayResourceId.asList
+    )(mockFactory)
+
+    verify(builder).setItems(arrayResourceId, null)
+  }
+
+  /** Tests using an array resource ID for content with a listener. */
+  def testArrayResourceContentWithListener() {
+    AlertDialogBuilder(
+      context,
+      arrayResourceId.asList onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setItems(arrayResourceId, onClickListener)
+  }
+
+  /** Tests using an array resource ID with single-choice mode. */
+  def testArrayResourceContentWithSingleChoice() {
+    AlertDialogBuilder(
+      context,
+      arrayResourceId.asList withSingleChoice checkedItem
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(arrayResourceId, checkedItem, null)
+  }
+
+  /** Tests using an array resource ID with single-choice mode and a
+    * listener. */
+  def testArrayResourceContentWithSingleChoiceAndListener() {
+    AlertDialogBuilder(
+      context,
+      arrayResourceId.asList withSingleChoice() onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(arrayResourceId, -1, onClickListener)
+  }
+
+  /** Tests using an array resource ID with multiple-choice mode. */
+  def testArrayResourceContentWithMultipleChoice() {
+    AlertDialogBuilder(
+      context,
+      arrayResourceId.asList withMultipleChoices arrayChoices
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(arrayResourceId, arrayChoices,  null)
+  }
+
+  /** Tests using an array resource ID with multiple-choice mode and a
+    * listener. */
+  def testArrayResourceContentWithMultipleChoiceAndListener() {
+    AlertDialogBuilder(
+      context,
+      arrayResourceId.asList withMultipleChoices arrayChoices
+          onMultiChoiceClick onMultiClickListener
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(
+      arrayResourceId, arrayChoices, onMultiClickListener)
+  }
+
+  /** Tests using an array resource ID in multiple-choice mode with no
+    * selections. */
+  def testArrayResourceContentWithNoMultipleChoices() {
+    AlertDialogBuilder(
+      context,
+      arrayResourceId.asList withMultipleChoices()
+          onMultiChoiceClick onMultiClickListener
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(
+      arrayResourceId, null, onMultiClickListener)
+  }
 }
 
 /** Constants for use by the `AlertDialogBuilderSuite` test suite.
@@ -749,4 +826,8 @@ object AlertDialogBuilderSuite {
   val onMultiClickListener =
     mock(classOf[DialogInterface.OnMultiChoiceClickListener])
   val onMultiClickFn = {(_:DialogInterface, _: Int, _:Boolean) => }
+  /** Resource ID for list content. */
+  val arrayResourceId = android.R.array.phoneTypes
+  /** An array of choices for multi-choice mode. */
+  val arrayChoices = Array(false, true, true, false, false)
 }
