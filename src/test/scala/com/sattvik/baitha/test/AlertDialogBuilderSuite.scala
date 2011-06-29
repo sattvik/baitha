@@ -20,7 +20,7 @@ import java.util.Date
 import android.app.AlertDialog
 import android.graphics.drawable.Drawable
 import android.view.View
-import android.widget.ListAdapter
+import android.widget.{AdapterView, ListAdapter}
 import org.mockito.Mockito._
 import org.mockito.Matchers
 import org.mockito.Matchers._
@@ -963,6 +963,23 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
 
     verify(builder).setOnCancelListener(
       isA(classOf[DialogInterface.OnCancelListener]))
+  }
+
+  /** Tests setting an on cancel listener. */
+  def testSetOnItemSelectedListener() {
+    val listener = new AdapterView.OnItemSelectedListener {
+      def onNothingSelected(p1: AdapterView[_]) {}
+
+      def onItemSelected(p1: AdapterView[_], p2: View, p3: Int, p4: Long) {}
+    }
+
+    AlertDialogBuilder(
+      context,
+      messageString,
+      onItemSelectedListener = listener
+    )(mockFactory)
+
+    verify(builder).setOnItemSelectedListener(listener)
   }
 }
 

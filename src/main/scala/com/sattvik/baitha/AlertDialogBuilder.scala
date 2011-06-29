@@ -22,6 +22,7 @@ import android.content.DialogInterface._
 import android.database.Cursor
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ListAdapter
 import com.sattvik.baitha.AlertDialogBuilder.{DialogueFunctor, BuilderFactory}
 
@@ -356,6 +357,8 @@ class AlertDialogBuilder private(
   *   false</li>
   *   <li>`onCancel`: adds a listener or function that will be executed if
   *   the dialogue is cancelled.</li>
+  *   <li>`onItemSelectedListener`: adds a listener that will be executed
+  *   when an item in the list is selected or if the selection disappears.</li>
   * </ul>
   *
   *
@@ -413,7 +416,8 @@ object AlertDialogBuilder {
     negativeButton: Button = NoButton,
     cancellable: Boolean = true,
     forceInverseBackground: Boolean = false,
-    onCancel: OnCancelListener = null
+    onCancel: OnCancelListener = null,
+    onItemSelectedListener: OnItemSelectedListener = null
   )(
     implicit factory: BuilderFactory
   ): AlertDialogBuilder = {
@@ -429,6 +433,13 @@ object AlertDialogBuilder {
       { (_: AndroidBuilder).setCancelable(cancellable) },
       { b: AndroidBuilder =>
         if(onCancel != null) b.setOnCancelListener(onCancel) else b
+      },
+      { b: AndroidBuilder =>
+        if(onItemSelectedListener != null) {
+          b.setOnItemSelectedListener(onItemSelectedListener)
+        } else {
+          b
+        }
       }
     )
     new AlertDialogBuilder(context, factory, actions)
