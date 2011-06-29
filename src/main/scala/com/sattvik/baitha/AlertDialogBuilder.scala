@@ -130,7 +130,7 @@ class AlertDialogBuilder private(
   * <ul>
   *   <li>A `ListAdapter` object</li>
   *   <li>A `Cursor` object</li>
-  *   <li>Arrays based on resource IDs or passed in directly</li>
+  *   <li>Arrays from resource IDs or from collections passed in directly</li>
   * </ul>
   *
   * ==== Choice modes and callbacks ====
@@ -215,7 +215,7 @@ class AlertDialogBuilder private(
   *   onMultiChoiceClick {(_,_,_) => // do something})
   * }}}
   *
-  * ==== Array-based content ====
+  * ==== Collection/array-based content ====
   *
   * Dialogue content backed by an can operate in all three modes.  The array
   * can be passed directly the builder, or it can be read from an array
@@ -253,7 +253,7 @@ class AlertDialogBuilder private(
   * AlertDialogBuilder(context, R.array.goodies.asList onClick {(_,_) =>})
   *
   * // single-choice mode, with "foo" checked
-  * val items = Array("one", "two", "foo")
+  * val items = List("one", "two", "foo")
   * AlertDialogBuilder(context, items withSingleChoice 2)
   *
   * // single-choice mode, no item checked, with call-back
@@ -767,6 +767,67 @@ object AlertDialogBuilder {
     def apply(b: AndroidBuilder) {
       b.setMultiChoiceItems(source, checkedItems, listener)
     }
+  }
+
+  /** Array content based on a raw character sequence array. */
+  final class CharSeqArrayContent(items: Array[CharSequence])
+      extends  DefaultArrayContent(items) {
+    require(items != null, "Items array cannot be null.")
+
+    protected def defaultApply(b: AndroidBuilder) {
+      b.setItems(source, listener)
+    }
+
+    protected def singleChoiceApply(b: AndroidBuilder) {
+      b.setSingleChoiceItems(source, checkedItem, listener)
+    }
+
+    def toMultipleChoice(
+      choices: Option[Array[Boolean]]
+    ): MultipleChoiceArrayContent[Array[CharSequence]] = {
+      new MultipleChoiceCharSeqArrayContent(this, choices)
+    }
+  }
+
+  /** Multiple-choice array content based on a raw array. */
+  final class MultipleChoiceCharSeqArrayContent(
+    content: CharSeqArrayContent,
+    choices: Option[Array[Boolean]]
+  ) extends MultipleChoiceArrayContent(content, choices) {
+    require(
+      choices == None || choices.get.length == source.length,
+      "Item array and multiple choice array have differing numbers of items.")
+
+    def apply(b: AndroidBuilder) {
+      b.setMultiChoiceItems(source, checkedItems, listener)
+    }
+  }
+
+  /** Creates content base on a character sequence array.  The array is used
+    * directly.  */
+  implicit def charSeqArrayToContent[T <: CharSequence](
+    items: Array[T]
+  ):  CharSeqArrayContent = {
+    new CharSeqArrayContent(items.asInstanceOf[Array[CharSequence]])
+  }
+
+  /** Creates content from general arrays that are not character sequences.
+    * Calls `toString` on each element and creates an array from the result. */
+  implicit def genericArrayToContent[T](
+    items: Array[T]
+  ):  CharSeqArrayContent = {
+    collectionToContent(items)
+  }
+
+  /** Creates content from collections in general.  Calls `toString` on each
+    * element and creates an array from the result. */
+  implicit def collectionToContent[T](
+    items: Traversable[T]
+  ): CharSeqArrayContent = {
+    require(items != null, "Cannot use a null reference as list content.")
+    val itemArray = new Array[CharSequence](items.size)
+    items.map(_.toString).copyToArray(itemArray)
+    new CharSeqArrayContent(itemArray)
   }
 
   /** The master trait for any title for an alert dialogue. */

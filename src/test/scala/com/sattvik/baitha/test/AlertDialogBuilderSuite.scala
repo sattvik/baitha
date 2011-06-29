@@ -16,6 +16,7 @@
  */
 package com.sattvik.baitha.test
 
+import java.util.Date
 import android.app.AlertDialog
 import android.graphics.drawable.Drawable
 import android.view.View
@@ -29,7 +30,6 @@ import com.sattvik.baitha.AlertDialogBuilder._
 import com.sattvik.baitha.test.AlertDialogBuilderSuite._
 import android.content.{DialogInterface, Context}
 import android.database.Cursor
-import org.mockito.internal.matchers.InstanceOf
 
 /** Test suite for the AlertDialogBuilder utility.
   *
@@ -774,6 +774,167 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     verify(builder).setMultiChoiceItems(
       arrayResourceId, null, onMultiClickListener)
   }
+
+  /** Tests using an array of strings for content. */
+  def testStringArrayContent() {
+    AlertDialogBuilder(
+      context,
+      stringArrayItems
+    )(mockFactory)
+
+    verify(builder).setItems(
+      stringArrayItems.asInstanceOf[Array[CharSequence]],
+      null)
+  }
+
+  /** Tests using a null array of strings for content. */
+  def testNullStringArrayContent() {
+    val nullContent: Array[CharSequence] = null
+
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        nullContent
+      )(mockFactory)
+    }
+  }
+
+  /** Tests using an array of general objects for content. */
+  def testObjectArrayContent() {
+    AlertDialogBuilder(
+      context,
+      dateArrayItems
+    )(mockFactory)
+
+    verify(builder).setItems(
+      dateArrayItems.map(_.toString).toArray.asInstanceOf[Array[CharSequence]],
+      null)
+  }
+
+  /** Tests using a null array of other objects for content. */
+  def testNullObjectArrayContent() {
+    val nullContent: Array[Int] = null
+
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        nullContent
+      )(mockFactory)
+    }
+  }
+
+  /** Tests using an collection for content. */
+  def testCollectionContent() {
+    AlertDialogBuilder(
+      context,
+      stringListItems
+    )(mockFactory)
+
+    verify(builder).setItems(
+      stringListItems.toArray.asInstanceOf[Array[CharSequence]],
+      null)
+  }
+
+  /** Tests using a null collection for content. */
+  def testNullCollectionContent() {
+    val nullContent: List[List[AnyRef]] = null
+
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        nullContent
+      )(mockFactory)
+    }
+  }
+
+  /** Tests using a string array content with a listener. */
+  def testStringArrayContentWithListener() {
+    AlertDialogBuilder(
+      context,
+      stringArrayItems onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setItems(
+      stringArrayItems.asInstanceOf[Array[CharSequence]],
+      onClickListener)
+  }
+
+  /** Tests using a string array with single-choice mode. */
+  def testStringArrayContentWithSingleChoice() {
+    AlertDialogBuilder(
+      context,
+      stringArrayItems withSingleChoice checkedItem
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(
+      stringArrayItems.asInstanceOf[Array[CharSequence]],
+      checkedItem,
+      null)
+  }
+
+  /** Tests using a string array with single-choice mode and a listener. */
+  def testStringArrayContentWithSingleChoiceAndListener() {
+    AlertDialogBuilder(
+      context,
+      stringArrayItems withSingleChoice() onClick onClickListener
+    )(mockFactory)
+
+    verify(builder).setSingleChoiceItems(
+      stringArrayItems.asInstanceOf[Array[CharSequence]],
+      -1,
+      onClickListener)
+  }
+
+  /** Tests using an array resource ID with multiple-choice mode. */
+  def testStringArrayContentWithMultipleChoice() {
+    AlertDialogBuilder(
+      context,
+      stringArrayItems withMultipleChoices arrayChoices
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(
+      stringArrayItems.asInstanceOf[Array[CharSequence]],
+      arrayChoices,
+      null)
+  }
+
+  /** Tests using an array resource ID with wrong number of multiple choices. */
+  def testStringArrayContentWithBadMultipleChoices() {
+    intercept[IllegalArgumentException] {
+      AlertDialogBuilder(
+        context,
+        stringArrayItems withMultipleChoices Array(true, false)
+      )(mockFactory)
+    }
+  }
+
+  /** Tests using a string array with multiple-choice mode and a listener. */
+  def testStringArrayContentWithMultipleChoiceAndListener() {
+    AlertDialogBuilder(
+      context,
+      stringArrayItems withMultipleChoices arrayChoices
+          onMultiChoiceClick onMultiClickListener
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(
+      stringArrayItems.asInstanceOf[Array[CharSequence]],
+      arrayChoices,
+      onMultiClickListener)
+  }
+
+  /** Tests using a string array in multiple-choice mode with no selections. */
+  def testStringArrayContentWithNoMultipleChoices() {
+    AlertDialogBuilder(
+      context,
+      stringArrayItems withMultipleChoices()
+          onMultiChoiceClick onMultiClickListener
+    )(mockFactory)
+
+    verify(builder).setMultiChoiceItems(
+      stringArrayItems.asInstanceOf[Array[CharSequence]],
+      null,
+      onMultiClickListener)
+  }
 }
 
 /** Constants for use by the `AlertDialogBuilderSuite` test suite.
@@ -830,4 +991,10 @@ object AlertDialogBuilderSuite {
   val arrayResourceId = android.R.array.phoneTypes
   /** An array of choices for multi-choice mode. */
   val arrayChoices = Array(false, true, true, false, false)
+  /** An array of items to pass directly as content. */
+  val stringArrayItems = Array("one", "two", "three", "four", "five")
+  /** A list of items to pass directly as content. */
+  val stringListItems = List("one", "two", "three", "four", "five")
+  /** An array of non-character sequence objects to pass as content. */
+  val dateArrayItems = Array(new Date, new Date, new Date)
 }
