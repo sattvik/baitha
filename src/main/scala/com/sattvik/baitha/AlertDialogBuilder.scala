@@ -43,8 +43,7 @@ import com.sattvik.baitha.AlertDialogBuilder.{DialogueFunctor, BuilderFactory}
 class AlertDialogBuilder private(
   context: Context,
   factory: BuilderFactory,
-  actions: List[DialogueFunctor],
-  cancellable: Boolean
+  actions: List[DialogueFunctor]
 ) {
 
   /** The underlying builder. */
@@ -53,7 +52,6 @@ class AlertDialogBuilder private(
   require(context != null, "Dialog context must not be null.")
   // apply all of the actions to the builder
   actions foreach (_(builder))
-  builder.setCancelable(cancellable)
 
   /** Creates an `AlertDialog` with the arguments supplied to this builder.
     * It does not `show()` the dialog. This allows the user to do any extra
@@ -296,6 +294,11 @@ class AlertDialogBuilder private(
   * <ul>
   *   <li>`cancellable`: whether or not the user can cancel the dialogue,
   *   defaults to true</li>
+  *   <li>`forceInverseBackground`: whether or not to force the use of an
+  *   inverse background regardless of the content.  List-type content
+  *   generally automatically has an inverse background.  This seems to only
+  *   have an effect when using a custom view for content.  Defaults to
+  *   false</li>
   * </ul>
   *
   *
@@ -315,6 +318,17 @@ class AlertDialogBuilder private(
   * @author Daniel Solano Gómez
   */
 object AlertDialogBuilder {
+  /** Creates a new `DialogueFunctor` from a function. */
+  private implicit def fnToDialogueFunctor(
+    fn: AndroidBuilder => AndroidBuilder
+  ) = {
+    new DialogueFunctor {
+      def apply(b: AndroidBuilder) {
+        fn(b)
+      }
+    }
+  }
+
   /** Creates a new alert dialogue builder.  See the object documentation for
     *  more information on how to use this method.
     *
@@ -328,6 +342,10 @@ object AlertDialogBuilder {
     * @param negativeButton an optional negative button for the dialogue
     * @param cancellable whether or not the user may cancel the dialogue,
     * defaults to true
+    * @param forceInverseBackground whether or not an inverse background
+    * should be forced regardless of the content type.  By default,
+    * list-type content has an inverse background.  This seems to only have
+    * an effect with custom content using a view.
     */
   def apply(
     context: Context,
@@ -336,18 +354,23 @@ object AlertDialogBuilder {
     positiveButton: Button = NoButton,
     neutralButton: Button = NoButton,
     negativeButton: Button = NoButton,
-    cancellable: Boolean = true
+    cancellable: Boolean = true,
+    forceInverseBackground: Boolean = false
   )(
     implicit factory: BuilderFactory
   ): AlertDialogBuilder = {
-    val actions = List(
+    val actions = List[DialogueFunctor](
       content,
       title,
       newButtonFunctor(positiveButton, PositiveButton),
       newButtonFunctor(neutralButton, NeutralButton),
-      newButtonFunctor(negativeButton, NegativeButton)
+      newButtonFunctor(negativeButton, NegativeButton),
+      { b: AndroidBuilder =>
+        b.setInverseBackgroundForced(forceInverseBackground)
+      },
+      { (_: AndroidBuilder).setCancelable(cancellable) }
     )
-    new AlertDialogBuilder(context, factory, actions, cancellable)
+    new AlertDialogBuilder(context, factory, actions)
   }
 
   /** Handy name for the underlying builder type. */

@@ -47,6 +47,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     AlertDialogBuilder(context, messageString)(mockFactory)
     verify(builder).setMessage(messageString)
     verify(builder).setCancelable(true)
+    verify(builder).setInverseBackgroundForced(false)
     verifyNoMoreInteractions(builder)
   }
 
@@ -673,6 +674,28 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
       Matchers.eq(checkedColumn),
       Matchers.eq(labelColumn),
       isA(classOf[DialogInterface.OnMultiChoiceClickListener]))
+  }
+
+  /** Tests forcing an inverse background. */
+  def testForceInverseBackground() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      forceInverseBackground = true
+    )(mockFactory)
+
+    verify(builder).setInverseBackgroundForced(true)
+  }
+
+  /** Tests not forcing an inverse background. */
+  def testDoNotForceInverseBackground() {
+    AlertDialogBuilder(
+      context,
+      messageString,
+      forceInverseBackground = false
+    )(mockFactory)
+
+    verify(builder).setInverseBackgroundForced(false)
   }
 }
 
