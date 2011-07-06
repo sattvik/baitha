@@ -55,6 +55,8 @@ object EnhancedViews extends EnhancedViews {
     }
   }
 
+  /** Adds a convenience method to be able to enable all of the children of a
+    * radio group in one go. */
   protected class EnhancedRadioGroup(radioGroup: RadioGroup) {
     def setChildrenEnabled(enabled: Boolean) {
       for(i <- 0 until radioGroup.getChildCount) {
