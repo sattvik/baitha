@@ -17,10 +17,10 @@
 package com.sattvik.baitha.test
 
 import android.view.View
+import android.widget._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import com.sattvik.baitha.EnhancedViews
-import android.widget.{RadioButton, RadioGroup}
 import org.scalatest.{Suite, OneInstancePerTest}
 
 /** Defines the tests for the EnhancedViews trait and companion object.
@@ -36,8 +36,34 @@ abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest {
     verify(mockedView).setOnClickListener(any(classOf[View.OnClickListener]))
   }
 
+  /** Tests that `AdapterView`s can have an enhanced onItemClick method. */
+  final def testOnItemClick() {
+    val view = mock(classOf[AdapterView[ListAdapter]])
+
+    doOnItemClick(view)
+
+    verify(view).setOnItemClickListener(
+      isA(classOf[AdapterView.OnItemClickListener]))
+  }
+
+  /** Tests that `AdapterView`s can have an enhanced onItemLongClick method. */
+  final def testOnItemLongClick() {
+    val view = mock(classOf[AdapterView[ListAdapter]])
+
+    doOnItemLongClick(view)
+
+    verify(view).setOnItemLongClickListener(
+      isA(classOf[AdapterView.OnItemLongClickListener]))
+  }
+
   /** Allow each implementation to actually do the onClick */
   def doOnClick(view: View)
+
+  /** Allow each implementation to actually do the onItemClick */
+  def doOnItemClick(view: AdapterView[_])
+
+  /** Allow each implementation to actually do the onItemLongClick */
+  def doOnItemLongClick(view: AdapterView[_])
 
   /** Tests that the setChildrenEnabled method works. */
   def testSetChildrenEnabled() {
@@ -73,11 +99,18 @@ abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest {
   *
   * @author Daniel Solano Gómez */
 class EnhancedViewsObjectSuite extends EnhancedViewsSuite {
-
   import com.sattvik.baitha.EnhancedViews._
 
   def doOnClick(view: View) {
     view onClick {_ =>}
+  }
+
+  def doOnItemClick(view: AdapterView[_]) {
+    view onItemClick {(_, _, _, _) =>}
+  }
+
+  def doOnItemLongClick(view: AdapterView[_]) {
+    view onItemLongClick {(_, _, _, _) => true}
   }
 
   def doSetChildrenEnabled(radioGroup: RadioGroup, enabled: scala.Boolean) {
@@ -91,6 +124,14 @@ class EnhancedViewsObjectSuite extends EnhancedViewsSuite {
 class EnhancedViewsTraitSuite extends EnhancedViewsSuite with EnhancedViews {
   def doOnClick(view: View) {
     view onClick {_ =>}
+  }
+
+  def doOnItemClick(view: AdapterView[_]) {
+    view onItemClick {(_, _, _, _) =>}
+  }
+
+  def doOnItemLongClick(view: AdapterView[_]) {
+    view onItemLongClick {(_, _, _, _) => true}
   }
 
   def doSetChildrenEnabled(radioGroup: RadioGroup, enabled: scala.Boolean) {
