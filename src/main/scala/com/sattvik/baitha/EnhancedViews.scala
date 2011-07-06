@@ -16,9 +16,8 @@
  */
 package com.sattvik.baitha
 
-import _root_.android.view.View
+import android.view.View
 import android.widget.RadioGroup
-import java.lang.Boolean
 
 /** The EnhancedViews trait adds an implicit conversion that makes working with
   * Views a bit easier.
@@ -57,7 +56,7 @@ object EnhancedViews extends EnhancedViews {
   }
 
   protected class EnhancedRadioGroup(radioGroup: RadioGroup) {
-    def setChildrenEnabled(enabled: scala.Boolean) {
+    def setChildrenEnabled(enabled: Boolean) {
       for(i <- 0 until radioGroup.getChildCount) {
         radioGroup.getChildAt(i).setEnabled(enabled)
       }
