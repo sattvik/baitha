@@ -52,8 +52,22 @@ object SdkVersions extends Enumeration with SdkVersions {
   val Honeycomb = Value(11)
   /** Android 3.1, released May 2011. */
   val HoneycombMR1 = Value(12)
+  /** Android 3.2, released July 2011. */
+  val HoneycombMR2 = Value(13)
   /** Magic version number for a current development build. */
   val CurrentDevelopment = Value(10000)
+
+  /** Returns an enumeration value corresponding to the given API level.
+    * This performs essentially the same task as `apply(Int)`, but is able to
+    * gracefully handle unknown versions by generating a new value on the fly.
+    */
+  def fromApiLevel(version: Int): SdkVersion = {
+    try {
+      super.apply(version)
+    } catch {
+      case _ => Value(version, "Unknown")
+    }
+  }
 }
 
 /** A somewhat private trait that implements the logic for the SdkVersions
@@ -64,7 +78,7 @@ private[baitha] trait SdkVersions {
   import SdkVersions._
 
   /** The current SDK version, initialised at run-time. */
-  protected lazy val currentSdkVersion = SdkVersions(Build.VERSION.SDK_INT)
+  protected lazy val currentSdkVersion = fromApiLevel(Build.VERSION.SDK_INT)
 
   /** Returns true if the current SDK version is less than the given SDK
     * version. */

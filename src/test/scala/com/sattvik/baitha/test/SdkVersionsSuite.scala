@@ -55,4 +55,13 @@ class SdkVersionsSuite extends Suite {
     expect(true)(currentSdkBefore(Donut))
     expect(true)(currentSdkSince(NoVersion))
   }
+
+  /** Tests gracefully handling an unfamiliar API version. */
+  def testUnknownVersion() {
+    val unknown = new SdkVersions {
+      override lazy val currentSdkVersion = SdkVersions.fromApiLevel(42)
+    }
+    expect(true)(unknown.currentSdkBefore(CurrentDevelopment))
+    expect(true)(unknown.currentSdkSince(Donut))
+  }
 }
