@@ -2,6 +2,9 @@ Baiṭha: The Scala/Android Toolkit
 =================================
 Daniel Solano_Gómez
 
+Baitha is a library designed to make Scala development on Android easier and
+more fun.  It leverages some of Scala's features such as mix-ins and implicit
+conversions to make Android development with Scala a bit more idiomatic.
 
 == Current features
 
