@@ -36,7 +36,6 @@
         <option name="BLANK_LINES_AROUND_CLASS" value="0" />
         <option name="BLANK_LINES_AROUND_METHOD_IN_INTERFACE" value="0" />
         <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
-        <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
         <option name="ALIGN_MULTILINE_EXTENDS_LIST" value="true" />
         <option name="ALIGN_GROUP_FIELD_DECLARATIONS" value="true" />
         <option name="CALL_PARAMETERS_WRAP" value="5" />
@@ -56,6 +55,7 @@
         <option name="WHILE_BRACE_FORCE" value="3" />
         <ScalaCodeStyleSettings>
           <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="3" />
+          <option name="WRAP_BEFORE_WITH_KEYWORD" value="true" />
           <option name="METHOD_BRACE_FORCE" value="1" />
           <option name="PLACE_CLOSURE_PARAMETERS_ON_NEW_LINE" value="false" />
           <option name="PLACE_SELF_TYPE_ON_NEW_LINE" value="false" />
