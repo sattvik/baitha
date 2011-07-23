@@ -30,12 +30,18 @@ import TypedCursorWrapperSuite._
 class TypedCursorWrapperSuite extends JUnit3Suite {
   /** The cursor to be wrapped. */
   val mockCursor = new MockCursor {
-    override def getColumnIndex(name: String): Int = {
-      if (name == Column) ColumnIndex else -1
+    def columnIndex(name: String, default: => Int): Int = {
+      name match {
+        case Column     => ColumnIndex
+        case NullColumn => NullColumnIndex
+        case _          => default
+      }
     }
 
+    override def getColumnIndex(name: String): Int = columnIndex(name, -1)
+
     override def getColumnIndexOrThrow(name: String): Int = {
-      if (name == Column) ColumnIndex else throw new IllegalArgumentException
+      columnIndex(name, throw new IllegalArgumentException)
     }
 
     override def getBlob(index: Int) = BlobData
@@ -50,7 +56,9 @@ class TypedCursorWrapperSuite extends JUnit3Suite {
 
     override def getShort(index: Int) = ShortData
 
-    override def getString(index: Int) = if(index > 0) StringData else null
+    override def getString(index: Int) = if (index > 0) StringData else null
+
+    override def isNull(index: Int) = index == NullColumnIndex
   }
 
   /** The cursor to test. */
@@ -80,9 +88,33 @@ class TypedCursorWrapperSuite extends JUnit3Suite {
     }
   }
 
+  def testGetOptionBlob() {
+    expect(Some(BlobData)) {
+      cursor.getOption(TypedColumn[Array[Byte]](Column))
+    }
+  }
+
+  def testGetOptionNullBlob() {
+    expect(None) {
+      cursor.getOption(TypedColumn[Array[Byte]](NullColumn))
+    }
+  }
+
   def testGetOrThrowBlob() {
     expect(BlobData) {
       cursor.getOrThrow(TypedColumn[Array[Byte]](Column))
+    }
+  }
+
+  def testGetOrThrowOptionBlob() {
+    expect(Some(BlobData)) {
+      cursor.getOrThrowOption(TypedColumn[Array[Byte]](Column))
+    }
+  }
+
+  def testGetOrThrowOptionNullBlob() {
+    expect(None) {
+      cursor.getOrThrowOption(TypedColumn[Array[Byte]](NullColumn))
     }
   }
 
@@ -158,12 +190,11 @@ class TypedCursorWrapperSuite extends JUnit3Suite {
     }
   }
 
-
-    def testGetMissingColumn() {
-      expect(null) {
-        cursor.get(TypedColumn[String](MissingColumn))
-      }
+  def testGetMissingColumn() {
+    expect(null) {
+      cursor.get(TypedColumn[String](MissingColumn))
     }
+  }
 
   def testGetOrThrowMissingColumn() {
     intercept[IllegalArgumentException] {
@@ -189,9 +220,14 @@ class TypedCursorWrapperSuite extends JUnit3Suite {
 object TypedCursorWrapperSuite {
   /** The name of the column. */
   val Column = "exists"
+  /** The index of `Column`. */
   val ColumnIndex = 2
   /** The name of a missing column. */
   val MissingColumn = "missing"
+  /** The name of a column with a null value. */
+  val NullColumn = "null"
+  /** The index of `Column`. */
+  val NullColumnIndex = 42
 
   val BlobData   = Array[Byte](0, 1, 2, 3)
   val DoubleData = 4.0

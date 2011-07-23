@@ -42,6 +42,9 @@ import android.database.{CursorWrapper, Cursor}
   *   val myString = cursor.get(MyStringColumn)
   * }}}
   *
+  * This class also provides `Option` variants of `get` and `getOrThrow` that
+  * check to see if the column has a null value.
+  *
   * Note that `TypedCursorWrapper` also implements Android's `Cursor`
   * interface, allowing you to use this wrapper as a complete replacement for
   * the underlying cursor.
@@ -90,6 +93,19 @@ class TypedCursorWrapper(cursor: Cursor) extends CursorWrapper(cursor) {
     get(manifest[A], getColumnIndex(column))
   }
 
+  /** Returns the value of the requested column as an option.  This method is
+    * like `get(TypedColumn[A])` with the exception that if the value in the
+    * column is null, this method will return `None` instead of having
+    * undefined behaviour.
+    *
+    * @param column the column to target
+    *
+    * @return the value of the column as an option and `None` if the column
+    * has a null value */
+  def getOption[A: Manifest](column: TypedColumn[A]): Option[A] = {
+    getOption(manifest[A], getColumnIndex(column))
+  }
+
   /** Returns the value of the requested column.  This is functionally
     * equivalent the appropriate `getXxx` method on the raw cursor after
     * getting the index using `getColumnIndexOrThrow`.
@@ -104,6 +120,19 @@ class TypedCursorWrapper(cursor: Cursor) extends CursorWrapper(cursor) {
     * @return the value of the column */
   def getOrThrow[A: Manifest](column: TypedColumn[A]): A = {
     get(manifest[A], getColumnIndexOrThrow(column))
+  }
+
+  /** Returns the value of the requested column as an option.  This method is
+    * like `getOrThrow(TypedColumn[A])` with the exception that if the value in
+    * the column is null, this method will return `None` instead of having
+    * undefined behaviour.
+    *
+    * @param column the column to target
+    *
+    * @return the value of the column as an option and `None` if the column
+    * has a null value */
+  def getOrThrowOption[A: Manifest](column: TypedColumn[A]): Option[A] = {
+    getOption(manifest[A], getColumnIndexOrThrow(column))
   }
 
   /** Returns the value of the requested column as the requested type.  The
@@ -123,6 +152,17 @@ class TypedCursorWrapper(cursor: Cursor) extends CursorWrapper(cursor) {
       case _: NoSuchElementException => throw new IllegalArgumentException(
         "'%s' is not a supported TypedColumn type".format(manifest))
     }
+  }
+
+  /** Like `get[A](Manifest[A], Int)`, except that it wraps the result in an
+    * Option.  If the value at the index is null, returns `None`.
+    *
+    * @param manifest the manifest of the type of the value to get
+    * @param index the zero-based index of the target column
+    *
+    * @return the value of the column as an instance of the type in an option */
+  private def getOption[A](manifest: Manifest[A], index: Int): Option[A] = {
+    if (cursor.isNull(index)) None else Some(get(manifest, index))
   }
 }
 
