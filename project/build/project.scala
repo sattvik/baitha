@@ -25,6 +25,5 @@ class Parent(info: ProjectInfo) extends ParentProject(info) {
   class LibraryTestProject(info: ProjectInfo)
       extends AndroidLibraryTestProject(info) with Defaults {
     val scalatest = "org.scalatest" % "scalatest_2.8.1" % "1.5.1"
-    val mockito   = "org.mockito" % "mockito-core" % "1.8.5"
   }
 }
