@@ -54,6 +54,21 @@
         <jarDirectory url="file://$MODULE_DIR$/lib_managed/scala_2.8.1/test" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Compatibility library">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/android-support-v4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file:///opt/android-sdk-update-manager/extras/android/compatibility/v4/src/honeycomb" />
+          <root url="file:///opt/android-sdk-update-manager/extras/android/compatibility/v4/src/froyo" />
+          <root url="file:///opt/android-sdk-update-manager/extras/android/compatibility/v4/src/java" />
+          <root url="file:///opt/android-sdk-update-manager/extras/android/compatibility/v4/src/eclair" />
+          <root url="file:///opt/android-sdk-update-manager/extras/android/compatibility/v4/src/honeycomb_mr2" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>
 
