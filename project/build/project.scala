@@ -16,7 +16,7 @@ class Parent(info: ProjectInfo) extends ParentProject(info) {
   lazy val main = project(".", "baitha", new LibraryProject(_))
 
   class LibraryProject(info: ProjectInfo)
-      extends AndroidLibraryProject(info) with Defaults with IdeaProject {
+      extends AndroidLibraryProject(info) with Defaults {
     val scalatest = "org.scalatest" % "scalatest_2.8.1" % "1.5" % "test"
     val mockito   = "org.mockito" % "mockito-core" % "1.8.5" % "test"
   }
