@@ -32,6 +32,10 @@ SdkVersions::
   Offers conditional execution depending on the runtime version of the Android
   platform.
 
+TypedColumn and TypedCursorWrapper::
+
+  An easier way to get data out of a cursor.
+
 
 == Using the library
 
