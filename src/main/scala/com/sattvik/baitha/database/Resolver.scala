@@ -76,3 +76,42 @@ class Resolver(context: Context) {
       sort.orNull)
   }
 }
+
+/** Primarily serves as the container for the `Resolver.Component` trait.
+  *
+  * @author Daniel Solano Gómez */
+object Resolver {
+  /** A trait useful for dependency injection using the cake pattern.  If you
+    * have a class that needs use a resolver, you can add it as part of its
+    * self type.  As a result, it can access a resolver by using `resolver`,
+    * as in the following example:
+    *
+    * {{{
+    * class MyResolverUser {
+    *   this: Resolver.Component =>
+    *
+    *   def resolveSomething() = {
+    *     resolver.query(…)
+    *   }
+    * }
+    * }}}
+    *
+    * As a result, whenever a new instance of `MyResolverUser` is needed,
+    * the resolver needs to be provided.  For example, for production code this
+    * may look like:
+    *
+    * {{{
+    * class MyActivity extends Activity {
+    *   trait MyResolver {
+    *     val resolver = new Resolver(this)
+    *   }
+    *
+    *   val resolverUser = new MyResolverUser with MyResolver
+    * }
+    * }}}
+    */
+  trait Component {
+    /** Gets a resolver that is suitable for use. */
+    def resolver: Resolver
+  }
+}
