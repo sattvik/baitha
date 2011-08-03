@@ -188,20 +188,20 @@ trait Logger {this: LogConfig with LogPrinter =>
   }
 
   /** If the given log level is loggable, perform the given action. */
-  private def whenLoggable(logLevel: Int)(action: () => Int) = {
-    if (logLevel < config.minLogLevel) 0 else action()
+  private def whenLoggable(logLevel: Int)(action: => Int) = {
+    if (logLevel < config.minLogLevel) 0 else action
   }
 
   /** Logs an exception if the given log level is loggable. */
   private def logThrowable(logLevel: Int, throwable: Throwable) = {
-    whenLoggable(logLevel) {() =>
+    whenLoggable(logLevel) {
       printer.printLog(logLevel, Log.getStackTraceString(throwable))
     }
   }
 
   /** Logs a message if the given log level is loggable. */
   private def logMessage(logLevel: Int, message: AnyRef, args: Seq[Any]) = {
-    whenLoggable(logLevel) {() =>
+    whenLoggable(logLevel) {
       printer.printLog(logLevel, messageString(message, args))
     }
   }
@@ -220,7 +220,7 @@ trait Logger {this: LogConfig with LogPrinter =>
     message: AnyRef,
     args: Seq[Any]
   ) = {
-    whenLoggable(logLevel) {() =>
+    whenLoggable(logLevel) {
       printer.printLog(
         logLevel, messageString(message, args) + '\n' +
             Log.getStackTraceString(throwable))
