@@ -17,8 +17,10 @@
 package com.sattvik.baitha
 
 import android.util.Log
-import com.sattvik.baitha.Logger.{LogPrinter, LogConfig}
-import com.sattvik.baitha.SdkVersions._
+
+import Logger.{LogPrinter, LogConfig}
+
+import SdkVersions._
 
 /** An enhanced logging facility for Android inspired from the facility from
   * [[http://code.google.com/p/roboguice RoboGuice]].
@@ -98,8 +100,14 @@ trait Logger {this: LogConfig with LogPrinter =>
   /** The handler for terrible failures.  On FroYo and beyond, this defers to
     * Android's mechanism.  On versions before FroYo, it is simply handled as
     * an ASSERT level log message. */
-  private val wtfLogger = if (currentSdkSince(FroYo)) new FroYoWtfLogger
-                          else new PreFroYoWtfLogger
+  private val wtfLogger = {
+    if (currentSdkSince(FroYo)) {
+      new FroYoWtfLogger
+    }
+    else {
+      new PreFroYoWtfLogger
+    }
+  }
 
   /** Logs the exception at a VERBOSE level. */
   def v(throwable: Throwable) = logThrowable(Log.VERBOSE, throwable)
@@ -108,8 +116,9 @@ trait Logger {this: LogConfig with LogPrinter =>
   def v(message: AnyRef, args: Any*) = logMessage(Log.VERBOSE, message, args)
 
   /** Log the exception with a message at a VERBOSE level */
-  def v(throwable: Throwable, message: AnyRef, args: Any*) =
+  def v(throwable: Throwable, message: AnyRef, args: Any*) = {
     logThrowableWithMessage(Log.VERBOSE, throwable, message, args)
+  }
 
   /** Logs the exception at a DEBUG level. */
   def d(throwable: Throwable) = logThrowable(Log.DEBUG, throwable)
@@ -118,8 +127,9 @@ trait Logger {this: LogConfig with LogPrinter =>
   def d(message: AnyRef, args: Any*) = logMessage(Log.DEBUG, message, args)
 
   /** Log the exception with a message at a DEBUG level */
-  def d(throwable: Throwable, message: AnyRef, args: Any*) =
+  def d(throwable: Throwable, message: AnyRef, args: Any*) = {
     logThrowableWithMessage(Log.DEBUG, throwable, message, args)
+  }
 
   /** Logs the exception at a INFO level. */
   def i(throwable: Throwable) = logThrowable(Log.INFO, throwable)
@@ -128,8 +138,9 @@ trait Logger {this: LogConfig with LogPrinter =>
   def i(message: AnyRef, args: Any*) = logMessage(Log.INFO, message, args)
 
   /** Log the exception with a message at a INFO level */
-  def i(throwable: Throwable, message: AnyRef, args: Any*) =
+  def i(throwable: Throwable, message: AnyRef, args: Any*) = {
     logThrowableWithMessage(Log.INFO, throwable, message, args)
+  }
 
   /** Logs the exception at a WARN level. */
   def w(throwable: Throwable) = logThrowable(Log.WARN, throwable)
@@ -138,8 +149,9 @@ trait Logger {this: LogConfig with LogPrinter =>
   def w(message: AnyRef, args: Any*) = logMessage(Log.WARN, message, args)
 
   /** Log the exception with a message at a WARN level */
-  def w(throwable: Throwable, message: AnyRef, args: Any*) =
+  def w(throwable: Throwable, message: AnyRef, args: Any*) = {
     logThrowableWithMessage(Log.WARN, throwable, message, args)
+  }
 
   /** Logs the exception at a ERROR level. */
   def e(throwable: Throwable) = logThrowable(Log.ERROR, throwable)
@@ -148,8 +160,9 @@ trait Logger {this: LogConfig with LogPrinter =>
   def e(message: AnyRef, args: Any*) = logMessage(Log.ERROR, message, args)
 
   /** Log the exception with a message at a ERROR level */
-  def e(throwable: Throwable, message: AnyRef, args: Any*) =
+  def e(throwable: Throwable, message: AnyRef, args: Any*) = {
     logThrowableWithMessage(Log.ERROR, throwable, message, args)
+  }
 
   /** What a Terrible Failure: Report a condition that should never happen.
     * The error will always be logged at level ASSERT with the call stack.
@@ -162,30 +175,36 @@ trait Logger {this: LogConfig with LogPrinter =>
 
   /** What a Terrible Failure: Report a condition that should never happen.
     * Similar to wtf(AnyRef, Any*), but with an exception as well. */
-  def wtf(throwable: Throwable, message: AnyRef, args: Any*) =
+  def wtf(throwable: Throwable, message: AnyRef, args: Any*) = {
     wtfLogger.wtf(throwable, messageString(message, args))
+  }
 
   /** What a Terrible Failure: Report a condition that should never happen.
     * Similar to wtf(AnyRef, Any*), but with an exception to log. */
-  def wtf(throwable: Throwable) =
-    wtfLogger.wtf(throwable,
+  def wtf(throwable: Throwable) = {
+    wtfLogger.wtf(
+      throwable,
       if (throwable == null) "null" else throwable.getMessage)
+  }
 
   /** If the given log level is loggable, perform the given action. */
-  private def whenLoggable(logLevel: Int)(action: () => Int) =
+  private def whenLoggable(logLevel: Int)(action: () => Int) = {
     if (logLevel < config.minLogLevel) 0 else action()
+  }
 
   /** Logs an exception if the given log level is loggable. */
-  private def logThrowable(logLevel: Int, throwable: Throwable) =
+  private def logThrowable(logLevel: Int, throwable: Throwable) = {
     whenLoggable(logLevel) {() =>
       printer.printLog(logLevel, Log.getStackTraceString(throwable))
     }
+  }
 
   /** Logs a message if the given log level is loggable. */
-  private def logMessage(logLevel: Int, message: AnyRef, args: Seq[Any]) =
+  private def logMessage(logLevel: Int, message: AnyRef, args: Seq[Any]) = {
     whenLoggable(logLevel) {() =>
       printer.printLog(logLevel, messageString(message, args))
     }
+  }
 
   /** Creates a message by applying the arguments to the message in a fashion
     * similar to String.format(message, args). */
@@ -195,12 +214,18 @@ trait Logger {this: LogConfig with LogPrinter =>
   }
 
   /** Logs an exception with a message if the given log level is loggable. */
-  private def logThrowableWithMessage(logLevel: Int, throwable: Throwable,
-                                      message: AnyRef, args: Seq[Any]) =
+  private def logThrowableWithMessage(
+    logLevel: Int,
+    throwable: Throwable,
+    message: AnyRef,
+    args: Seq[Any]
+  ) = {
     whenLoggable(logLevel) {() =>
-      printer.printLog(logLevel, messageString(message, args) + '\n' +
-          Log.getStackTraceString(throwable))
+      printer.printLog(
+        logLevel, messageString(message, args) + '\n' +
+            Log.getStackTraceString(throwable))
     }
+  }
 
   /** The interface for a logger to support the What a Terrible Failure
     * report. */
@@ -211,15 +236,17 @@ trait Logger {this: LogConfig with LogPrinter =>
   /** The logger that uses the ASSERT log level for wtf messages.  This is for
     * platforms that don't support the wtf log method. */
   private class PreFroYoWtfLogger extends WtfLogger {
-    def wtf(throwable: Throwable, message: String) =
+    def wtf(throwable: Throwable, message: String) = {
       printer.printLog(Log.ASSERT, message)
+    }
   }
 
   /** The logger that actually uses the wtf log messages available since
     * FroYo. */
   private class FroYoWtfLogger extends WtfLogger {
-    def wtf(throwable: Throwable, message: String) =
+    def wtf(throwable: Throwable, message: String) = {
       Log.wtf(config.scope, message, throwable)
+    }
   }
 }
 
@@ -238,9 +265,10 @@ object Logger {
     * @param name the name of the scope for the logger
     * @param debug if true, the logger operates in debug mode,
     * otherwise it operates in production mode. */
-  def createLogger(name: String, debug: Boolean = false) =
+  def createLogger(name: String, debug: Boolean = false) = {
     if (debug) new DefaultLogger(name) with DebugMode
     else new DefaultLogger(name) with ProductionMode
+  }
 
   /** The log printer is in charge of actually taking a log message that has
     * been processed by the logger and logging it. */
@@ -260,8 +288,9 @@ object Logger {
   trait SimpleLogPrinter extends LogPrinter {this: LogConfig =>
     /** Simple printer that uses the configuration scope as the log tag. */
     class SimplePrinter extends Printer {
-      override def printLog(priority: Int, message: String) =
+      override def printLog(priority: Int, message: String) = {
         Log.println(priority, config.scope, message)
+      }
     }
   }
 
@@ -305,5 +334,17 @@ object Logger {
       extends Logger with SimpleLogPrinter with NamedDebugLogConfig {
     val config  = new NamedDebugConfig(name)
     val printer = new SimplePrinter
+  }
+
+  /** An implementation of the logger that does nothing, useful for testing. */
+  object NoOpLogger extends Logger with LogConfig with LogPrinter {
+    val printer = new Printer {
+      def printLog(priority: Int, message: String) = 0
+    }
+    val config  = new Config {
+      def minLogLevel = Int.MaxValue
+
+      def scope = null
+    }
   }
 }
