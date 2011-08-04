@@ -68,6 +68,17 @@ object SdkVersions extends Enumeration with SdkVersions {
       case _ => Value(version, "Unknown")
     }
   }
+
+  /** Trait for injecting an `SdkVersions` instance into another type. */
+  trait Injected {
+    def sdkVersions: SdkVersions
+  }
+
+  /** A default implementation of the `SdkVersions` injection that uses the
+    *  global `SdkVersions` object. */
+  trait DefaultSdkVersions extends Injected {
+    val sdkVersions = SdkVersions
+  }
 }
 
 /** A somewhat private trait that implements the logic for the SdkVersions
