@@ -14,6 +14,7 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 package com.sattvik.baitha.database
 
 import android.content.Context
@@ -77,7 +78,7 @@ class Resolver(context: Context) {
   }
 }
 
-/** Primarily serves as the container for the `Resolver.Component` trait.
+/** Primarily serves as the container for the `Resolver.Injected` trait.
   *
   * @author Daniel Solano Gómez */
 object Resolver {
@@ -88,7 +89,7 @@ object Resolver {
     *
     * {{{
     * class MyResolverUser {
-    *   this: Resolver.Component =>
+    *   this: Resolver.Injected =>
     *
     *   def resolveSomething() = {
     *     resolver.query(…)
@@ -110,7 +111,7 @@ object Resolver {
     * }
     * }}}
     */
-  trait Component {
+  trait Injected {
     /** Gets a resolver that is suitable for use. */
     def resolver: Resolver
   }
