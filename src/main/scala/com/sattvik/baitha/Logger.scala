@@ -337,7 +337,7 @@ object Logger {
   }
 
   /** An implementation of the logger that does nothing, useful for testing. */
-  object NoOpLogger extends Logger with LogConfig with LogPrinter {
+  trait NoOpLogger extends Logger with LogConfig with LogPrinter {
     val printer = new Printer {
       def printLog(priority: Int, message: String) = 0
     }
