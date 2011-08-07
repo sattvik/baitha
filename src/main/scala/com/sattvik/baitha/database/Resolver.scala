@@ -33,8 +33,7 @@ class Resolver(context: Context) {
     *
     * @return a cursor to the query results or `None` */
   def query(aQuery: Query[Uri], args: Any*): Option[Cursor] = {
-    val cursor =  query(aQuery withArgs args)
-    if(cursor == null) None else Some(cursor)
+    query(aQuery withArgs args)
   }
 
   /** Executes the query synchronously, returning a cursor to the result.
@@ -42,14 +41,15 @@ class Resolver(context: Context) {
     * @param query the query to execute
     *
     * @return a cursor to the query results */
-  def query(query: Query[Uri]): Cursor = {
+  def query(query: Query[Uri]): Option[Cursor] = {
     import query._
-    context.getContentResolver.query(
+    val cursor = context.getContentResolver.query(
       source,
       columns.orNull,
       where.orNull,
       whereArgs.orNull,
       sort.orNull)
+    if (cursor == null) None else Some(cursor)
   }
 
   /** Returns a cursor loader that will execute the query.
