@@ -31,9 +31,10 @@ class Resolver(context: Context) {
     * @param query the query to execute
     * @param args arguments for the query's filter
     *
-    * @return a cursor to the query results */
-  def query(aQuery: Query[Uri], args: Any*): Cursor = {
-    query(aQuery withArgs args)
+    * @return a cursor to the query results or `None` */
+  def query(aQuery: Query[Uri], args: Any*): Option[Cursor] = {
+    val cursor =  query(aQuery withArgs args)
+    if(cursor == null) None else Some(cursor)
   }
 
   /** Executes the query synchronously, returning a cursor to the result.
