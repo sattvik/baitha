@@ -14,6 +14,7 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 package com.sattvik.baitha.test
 
 import android.content.SharedPreferences
@@ -26,7 +27,9 @@ import com.sattvik.baitha._
 import com.sattvik.baitha.EnhancedPreferences.EnhancedEditor
 import com.sattvik.baitha.TypedPreference._
 
+import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify, when}
+import org.mockito.ArgumentCaptor
 
 /** Test suite for the `EnhancedPreferences` class.
   *
@@ -407,6 +410,40 @@ class EnhancedPreferencesSpec
           import EnhancedPreferences._
 
           mockPrefs.contains(BooleanPreference(prefKey))
+        }
+      }
+      "can register a listener" in {
+        new Fixture {
+          val captor = ArgumentCaptor.forClass(
+            classOf[SharedPreferences.OnSharedPreferenceChangeListener])
+          val token = prefs.onChange() { (_, _) =>  }
+          verify(mockPrefs).registerOnSharedPreferenceChangeListener(
+            captor.capture())
+          token should be theSameInstanceAs (captor.getValue)
+        }
+      }
+      "can unregister a listener" in {
+        new Fixture {
+          val token = prefs.onChange() { (_, _) =>  }
+          prefs.unregisterOnChange(token)
+          verify(mockPrefs).unregisterOnSharedPreferenceChangeListener(
+            token)
+        }
+      }
+      "listeners do filtering" in {
+        new Fixture {
+          val pref = TypedPreference[Int](prefKey)
+
+          val token = prefs.onChange(pref) { (tpref, value) =>
+            val OkKey = prefKey
+            tpref.key match {
+              case OkKey => // expected
+              case _ => fail("%s should not have been received".format(tpref))
+            }
+          }
+          token.onSharedPreferenceChanged(null, "FOOBAR")
+          token.onSharedPreferenceChanged(null, prefKey)
+          token.onSharedPreferenceChanged(null, "BARFOO")
         }
       }
     }

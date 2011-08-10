@@ -17,6 +17,7 @@
 package com.sattvik.baitha
 
 import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import com.sattvik.baitha.EnhancedPreferences.EnhancedEditor
 
 /** Provides additional functionality to Android's SharedPreferences to make
@@ -80,6 +81,43 @@ class EnhancedPreferences(wrapped: SharedPreferences) {
     body(editor)
     if (editor.aborted) false else wrappedEditor.commit()
   }
+
+  /** Registers a function that will be called whenever one or more
+    * preferences change.  You should use the returned token to unregister the
+    * function later using `unregisterOnChange`.
+    *
+    * @param interestingPreferences preferences for which the callback
+    * function should be executed
+    * @param fn the function that will be called when one of the
+    * `interestingPreferences` has changed.  This function takes two
+    * arguments, the preference that was changed and its new value in an
+    * option.  If the preference was removed, the value will be `None`.
+    *
+    * @return a token that can be used to unregister the listener using
+    * `unregisterOnChange`
+    */
+  def onChange(
+    interestingPreferences: TypedPreference[_]*
+  )(
+    fn: (TypedPreference[_], Option[_]) => Unit
+  ): Token = {
+    val listener = new OnSharedPreferenceChangeListener {
+      def onSharedPreferenceChanged(p1: SharedPreferences, key: String) {
+        interestingPreferences find(_.key == key) foreach { tpref =>
+          fn(tpref,getOption(tpref))
+        }
+      }
+    }
+    wrapped.registerOnSharedPreferenceChangeListener(listener)
+    listener
+  }
+
+  /** Unregisters a listener using the token returned by `onChange`. */
+  def unregisterOnChange(token: Token) {
+    wrapped.unregisterOnSharedPreferenceChangeListener(token)
+  }
+
+  type Token = SharedPreferences.OnSharedPreferenceChangeListener
 }
 
 /** Companion object for the `EnhancedPreferences` class that adds an
