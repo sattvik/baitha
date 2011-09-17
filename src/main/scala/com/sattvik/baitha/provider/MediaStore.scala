@@ -32,9 +32,9 @@ object MediaStore {
     /** The time the file was last modified.  Units are seconds since 1970. */
     val DateModified = TypedColumn[Long](MediaColumns.DATE_MODIFIED)
     /** The display name of the file. */
-    val DisplayName = TypedColumn[Long](MediaColumns.DISPLAY_NAME)
+    val DisplayName = TypedColumn[String](MediaColumns.DISPLAY_NAME)
     /** The MIME type of the file. */
-    val MimeType = TypedColumn[Long](MediaColumns.MIME_TYPE)
+    val MimeType = TypedColumn[String](MediaColumns.MIME_TYPE)
     /** The size of the file in bytes. */
     val Size = TypedColumn[Long](MediaColumns.SIZE)
     /** The title of the content. */
