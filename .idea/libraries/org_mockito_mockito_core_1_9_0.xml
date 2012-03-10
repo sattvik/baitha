@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="org.mockito_mockito-core_1.9.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mockito/mockito-core/jars/mockito-core-1.9.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mockito/mockito-core/docs/mockito-core-1.9.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mockito/mockito-core/srcs/mockito-core-1.9.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
