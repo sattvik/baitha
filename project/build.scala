@@ -10,13 +10,13 @@ object BaithaDefaults {
       name := "Baitha: The Scala/Android Toolkit",
       organization := "com.sattvik",
       version := "0.1-SNAPSHOT",
-      scalaVersion := "2.8.2",
+      scalaVersion := "2.9.1-1",
       scalacOptions ++= Seq (
         Opts.compile.deprecation,
         Opts.compile.unchecked,
         Opts.compile.optimise
       ),
-      platformName in Android := "android-12"
+      platformName in Android := "android-15"
     )
 
   val testSettings = AndroidTest.settings ++ settings
@@ -31,6 +31,9 @@ object BaithaBuild extends Build {
       libraryDependencies ++= Seq (
         "org.scalatest" %% "scalatest" % "1.7.1" % "test",
         "org.mockito" % "mockito-core" % "1.9.0" % "test"
+      ),
+      crossScalaVersions := Seq(
+        "2.8.1", "2.8.2", "2.9.0", "2.9.0-1", "2.9.1", "2.9.1-1"
       )
     )
   )
