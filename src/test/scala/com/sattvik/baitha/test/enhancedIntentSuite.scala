@@ -754,7 +754,8 @@ class SerializableExtraSuite
     extends AbstractTypedExtraSuite[DummySerializable] {
   val value = new DummySerializable
 
-  when(intent.getSerializableExtra(Name)).thenReturn(value)
+  when(intent.getSerializableExtra(Name)).thenReturn(value,
+    Array[Serializable](): _*)
 
   def createExtra(name: String) = SerializableExtra[DummySerializable](name)
 
@@ -826,13 +827,6 @@ class StringArrayListExtraSuite
   def createExtra(name: String) = StringArrayListExtra(name)
 
   def verifyPutExtra() {verify(intent).putExtra(Name, value)}
-}
-
-/** A dummy parcelable implementation. */
-class DummyParcelable extends Parcelable {
-  def describeContents() = 0
-
-  def writeToParcel(p1: Parcel, p2: Int) {}
 }
 
 /** A dummy serializable implementation. */
