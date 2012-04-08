@@ -23,7 +23,7 @@ import android.view.View
 import android.widget.{AdapterView, ListAdapter}
 import org.mockito.Mockito._
 import org.mockito.Matchers
-import org.mockito.Matchers._
+import org.mockito.Matchers.{eq => isEq, _}
 import org.scalatest.{OneInstancePerTest, Suite}
 import com.sattvik.baitha.AlertDialogBuilder
 import com.sattvik.baitha.AlertDialogBuilder._
@@ -266,7 +266,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setPositiveButton(
-      Matchers.eq(positiveButtonId),
+      isEq(positiveButtonId),
       isA(classOf[DialogInterface.OnClickListener]))
   }
 
@@ -280,7 +280,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setPositiveButton(
-      Matchers.eq(positiveButtonString),
+      isEq(positiveButtonString),
       isA(classOf[DialogInterface.OnClickListener]))
   }
 
@@ -341,7 +341,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setNeutralButton(
-      Matchers.eq(neutralButtonId),
+      isEq(neutralButtonId),
       isA(classOf[DialogInterface.OnClickListener]))
   }
 
@@ -355,7 +355,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setNeutralButton(
-      Matchers.eq(neutralButtonString),
+      isEq(neutralButtonString),
       isA(classOf[DialogInterface.OnClickListener]))
   }
 
@@ -416,7 +416,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setNegativeButton(
-      Matchers.eq(negativeButtonId),
+      isEq(negativeButtonId),
       isA(classOf[DialogInterface.OnClickListener]))
   }
 
@@ -430,7 +430,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setNegativeButton(
-      Matchers.eq(negativeButtonString),
+      isEq(negativeButtonString),
       isA(classOf[DialogInterface.OnClickListener]))
   }
 
@@ -511,7 +511,7 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setAdapter(
-      Matchers.eq(adapter),
+      isEq(adapter),
       isA(classOf[DialogInterface.OnClickListener]))
   }
 
@@ -670,9 +670,9 @@ class AlertDialogBuilderSuite extends Suite with OneInstancePerTest {
     )(mockFactory)
 
     verify(builder).setMultiChoiceItems(
-      Matchers.eq(cursor),
-      Matchers.eq(checkedColumn),
-      Matchers.eq(labelColumn),
+      isEq(cursor),
+      isEq(checkedColumn),
+      isEq(labelColumn),
       isA(classOf[DialogInterface.OnMultiChoiceClickListener]))
   }
 

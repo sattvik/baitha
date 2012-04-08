@@ -29,7 +29,7 @@ object TypedPreference {
     * override the default default value.  If you need a different default
     * value, construct the object directly.
     *
-    * @throw IllegalArgumentException if the type isn't natively supported
+    * @throws IllegalArgumentException if the type isn't natively supported
     */
   def apply[A : Manifest](key: String): TypedPreference[A] = {
     val factory = typeMap.get(manifest[A])

@@ -54,6 +54,10 @@ object SdkVersions extends Enumeration with SdkVersions {
   val HoneycombMR1 = Value(12)
   /** Android 3.2, released July 2011. */
   val HoneycombMR2 = Value(13)
+  /** Android 4.0, released October 2011. */
+  val IceCreamSandwich = Value(14)
+  /** Android 4.0.3. */
+  val IceCreamSandwichMR1 = Value(15)
   /** Magic version number for a current development build. */
   val CurrentDevelopment = Value(10000)
 
