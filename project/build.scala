@@ -18,8 +18,6 @@ object BaithaDefaults {
       ),
       platformName in Android := "android-15"
     )
-
-  val testSettings = AndroidTest.settings ++ settings
 }
 
 object BaithaBuild extends Build {
@@ -37,16 +35,4 @@ object BaithaBuild extends Build {
       )
     )
   )
-
-  lazy val test = Project(
-    "baitha-test",
-    file("test"),
-    settings =
-      BaithaDefaults.settings ++
-      AndroidTest.androidSettings ++
-      AndroidTest.settings ++ Seq (
-        name := "baitha_test",
-        libraryDependencies += "org.scalatest" %% "scalatest" % "1.7.1" % "test"
-      )
-  ) dependsOn main
 }
