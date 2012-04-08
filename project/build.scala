@@ -25,7 +25,7 @@ object BaithaBuild extends Build {
     "baitha",
     file("."),
     settings = BaithaDefaults.settings ++ Seq (
-      name := "baitha",
+      name := "baitha-queries",
       libraryDependencies ++= Seq (
         "org.scalatest" %% "scalatest" % "1.7.1" % "test",
         "org.mockito" % "mockito-core" % "1.9.0" % "test"
