@@ -5,3 +5,4 @@ src_managed/
 target/
 .idea/workspace.xml
 .idea/tasks.xml
+local.sbt
