@@ -9,7 +9,7 @@ object BaithaDefaults {
     AndroidBase.settings ++ Seq (
       name := "Baitha: The Scala/Android Toolkit",
       organization := "com.sattvik",
-      version := "0.1-SNAPSHOT",
+      version := "0.1.0-SNAPSHOT",
       scalaVersion := "2.9.1-1",
       scalacOptions ++= Seq (
         Opts.compile.deprecation,
