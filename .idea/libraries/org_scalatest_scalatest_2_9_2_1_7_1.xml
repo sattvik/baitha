@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="org.scalatest_scalatest_2.9.2_1.7.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.9.2/jars/scalatest_2.9.2-1.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.9.2/docs/scalatest_2.9.2-1.7.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.scalatest/scalatest_2.9.2/srcs/scalatest_2.9.2-1.7.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
