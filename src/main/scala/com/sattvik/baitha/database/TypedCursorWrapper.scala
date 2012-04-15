@@ -270,6 +270,10 @@ class TypedCursorWrapper(protected[this] val cursor: Cursor) extends Cursor {
     cursor.registerDataSetObserver(observer)
   }
 
+  @deprecated(
+    "Don't use this. Just request a new cursor, so you can do this " +
+        "asynchronously and update your list view once the new cursor comes " +
+        "back.")
   def requery() = cursor.requery()
 
   def respond(bundle: Bundle) = cursor.respond(bundle)
