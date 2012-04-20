@@ -17,7 +17,7 @@
 package com.sattvik.baitha
 
 import android.view.View
-import android.widget.{AdapterView, RadioGroup}
+import android.widget._
 
 /** The EnhancedViews trait adds an implicit conversion that makes working with
   * Views a bit easier.
@@ -37,11 +37,15 @@ trait EnhancedViews {
   implicit def enhanceAdapterView(v: AdapterView[_]): EnhancedAdapterView = {
     new EnhancedAdapterView(v)
   }
+
+  implicit def enhanceSeekBar(v: SeekBar): EnhancedSeekBar = {
+    new EnhancedSeekBar(v)
+  }
 }
 
 /** The companion object to the EnhancedViews trait.  This allows declaration
-  *  of the EnhancedView class without an implicit reference to an instance
-  *  of a class that has the EnhancedViews trait.
+  * of the EnhancedView class without an implicit reference to an instance of
+  * a class that has the EnhancedViews trait.
   *
   * @author Daniel Solano Gómez */
 object EnhancedViews extends EnhancedViews {
@@ -78,10 +82,10 @@ object EnhancedViews extends EnhancedViews {
       * function into an `AdapterView.OnItemClickListener`.
       *
       * @param f the function to wrap into the listener object.  It takes
-      * four arguments: 1) the adapter view where the click happened,
-      * 2) the view within the adapter view that was clicked,
-      * 3) the position of the view in the adapter, and 4) the row ID of the
-      * item that was clicked
+      *          four arguments: 1) the adapter view where the click happened,
+      *          2) the view within the adapter view that was clicked,
+      *          3) the position of the view in the adapter, and 4) the row ID
+      *          of the item that was clicked
       */
     def onItemClick(f: (AdapterView[_], View, Int, Long) => Unit) {
       adapterView.setOnItemClickListener(
@@ -101,11 +105,11 @@ object EnhancedViews extends EnhancedViews {
       * function into an `AdapterView.OnItemLongClickListener`.
       *
       * @param f the function to wrap into the listener object.  It takes
-      * four arguments: 1) the adapter view where the long click happened,
-      * 2) the view within the adapter view that was long clicked,
-      * 3) the position of the view in the adapter, and 4) the row ID of the
-      * item that was long clicked.  The function should evaluate to true if
-      * it consumed the long click.
+      *          four arguments: 1) the adapter view where the long click
+      *          happened, 2) the view within the adapter view that was long
+      *          clicked, 3) the position of the view in the adapter, and 4)
+      *          the row ID of the item that was long clicked.  The function
+      *          should evaluate to true if it consumed the long click.
       */
     def onItemLongClick(f: (AdapterView[_], View, Int, Long) => Boolean) {
       adapterView.setOnItemLongClickListener(
@@ -119,6 +123,80 @@ object EnhancedViews extends EnhancedViews {
             f(parent, view, pos, id)
           }
         })
+    }
+  }
+
+  /** The parent class for all seek bar events. */
+  sealed trait SeekBarEvent {
+    /** The source of the event. */
+    def source: SeekBar
+  }
+
+  /** A notification that the progress level has changed.  You can use the
+    * fromUser field to distinguish between user-initiated changes from those
+    * that occurred programmatically.
+    *
+    * @param source the seek bar that triggered the event
+    * @param progress the current progress level, which will be in the range
+    *                 of 0…max
+    * @param fromUser true if the progress change was initiated by the user
+    */
+  final case class ProgressChange(
+    source: SeekBar, progress: Int,
+    fromUser: Boolean
+  ) extends SeekBarEvent
+
+  /** A notification that the user has started a touch gesture.  You may want
+    * to use this to disable advancing the seek bar.
+    *
+    * @param source the seek bar that triggered the event
+    */
+  final case class StartTrackingTouch(source: SeekBar) extends SeekBarEvent
+
+  /** A notification that the user has finished a touch gesture.  You may want
+    * to use this to re-enable advancing the seek bar.
+    *
+    * @param source the seek bar that triggered the event
+    */
+  final case class StopTrackingTouch(source: SeekBar) extends SeekBarEvent
+
+  /** Adds a convenience method for setting an event handler for a SeekBar. */
+  protected class EnhancedSeekBar(seekBar: SeekBar) {
+    /** Sets the change listener on SeekBar by wrapping the given partial
+      * function in a `SeekBar.OnSeekBarChangeListener`.  As such,
+      * you can use it a manner similar to:
+      *
+      * {{{
+      * val seekBar: SeekBar = …
+      * seekBar oSeekBarEvent {
+      *   case ProgressChange(`seekBar`, x, true) => // do something…
+      *   case _ => // ignore all other events
+      * }
+      * }}}
+      *
+      * @param f the partial function to wrap into the listener object that
+      *          will handle SeekBarEvents.
+      */
+    def onSeekBarEvent(f: PartialFunction[SeekBarEvent, Unit]) {
+      seekBar.setOnSeekBarChangeListener(
+        new SeekBar.OnSeekBarChangeListener {
+          def onProgressChanged(
+            seekBar: SeekBar,
+            progress: Int,
+            fromUser: Boolean
+          ) {
+            f(ProgressChange(seekBar, progress, fromUser))
+          }
+
+          def onStopTrackingTouch(seekBar: SeekBar) {
+            f(StopTrackingTouch(seekBar))
+          }
+
+          def onStartTrackingTouch(seekBar: SeekBar) {
+            f(StartTrackingTouch(seekBar))
+          }
+        }
+      )
     }
   }
 }

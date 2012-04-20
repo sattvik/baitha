@@ -16,18 +16,25 @@
  */
 package com.sattvik.baitha.test
 
+import scala.collection.mutable.ListBuffer
 import android.view.View
 import android.widget._
-import org.mockito.Matchers._
-import org.mockito.Mockito._
 import com.sattvik.baitha.EnhancedViews
+import com.sattvik.baitha.EnhancedViews._
+import org.mockito.ArgumentCaptor
 import org.scalatest.{Suite, OneInstancePerTest}
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.mock.MockitoSugar
+
+import org.mockito.Matchers._
+import org.mockito.Mockito.{verify, when}
 
 /** Defines the tests for the EnhancedViews trait and companion object.
   *
   * @author Daniel Solano Gómez */
-abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest {
-  private val mockedView = mock(classOf[View])
+abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest with
+                                          MockitoSugar with ShouldMatchers {
+  private val mockedView = mock[View]
 
   /** Tests that views can have an enhanced onClick method. */
   final def testOnClick() {
@@ -38,7 +45,7 @@ abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest {
 
   /** Tests that `AdapterView`s can have an enhanced onItemClick method. */
   final def testOnItemClick() {
-    val view = mock(classOf[AdapterView[ListAdapter]])
+    val view = mock[AdapterView[ListAdapter]]
 
     doOnItemClick(view)
 
@@ -48,7 +55,7 @@ abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest {
 
   /** Tests that `AdapterView`s can have an enhanced onItemLongClick method. */
   final def testOnItemLongClick() {
-    val view = mock(classOf[AdapterView[ListAdapter]])
+    val view = mock[AdapterView[ListAdapter]]
 
     doOnItemLongClick(view)
 
@@ -68,8 +75,8 @@ abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest {
   /** Tests that the setChildrenEnabled method works. */
   def testSetChildrenEnabled() {
     def performTest(numChildren: Int, enabled: scala.Boolean) {
-      def newMockRadioButton = mock(classOf[RadioButton])
-      val group = mock(classOf[RadioGroup])
+      def newMockRadioButton = mock[RadioButton]
+      val group = mock[RadioGroup]
       val buttons = Array.fill(numChildren)(newMockRadioButton)
 
       // mock the calls to the radio group
@@ -93,6 +100,44 @@ abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest {
 
   /** Actually performs the setChildrenEnabled call. */
   def doSetChildrenEnabled(radioGroup: RadioGroup, enabled: scala.Boolean)
+
+  def testOnSeekBarEvent() {
+    val seekBar = mock[SeekBar]
+    val events = ListBuffer[SeekBarEvent]()
+
+    val eventHandler: PartialFunction[SeekBarEvent, Unit] = {
+      case ev @ ProgressChange(`seekBar`, _, _) => events += ev
+      case ev @ StartTrackingTouch(`seekBar`) => events += ev
+      case ev @ StopTrackingTouch(`seekBar`) => events += ev
+      case _ => // ignore everything else
+    }
+
+    doOnSeekBarEvent(seekBar, eventHandler)
+
+    val captor = ArgumentCaptor
+        .forClass(classOf[SeekBar.OnSeekBarChangeListener]);
+    verify(seekBar).setOnSeekBarChangeListener(captor.capture());
+    val listener = captor.getValue
+
+    val fake = mock[SeekBar]("Fake SeekBar")
+
+    listener.onStartTrackingTouch(seekBar)
+    listener.onStartTrackingTouch(fake)
+    listener.onProgressChanged(seekBar, 10, true)
+    listener.onProgressChanged(fake, 10, true)
+    listener.onProgressChanged(seekBar, 40, false)
+    listener.onStopTrackingTouch(seekBar)
+
+    events should equal (List(
+      StartTrackingTouch(seekBar),
+      ProgressChange(seekBar, 10, true),
+      ProgressChange(seekBar, 40, false),
+      StopTrackingTouch(seekBar)
+    ))
+  }
+
+  /** Actually sets the event listener. */
+  def doOnSeekBarEvent(seekBar: SeekBar, f: PartialFunction[SeekBarEvent, Unit])
 }
 
 /** Tests the EnhancedViews companion object.
@@ -116,6 +161,13 @@ class EnhancedViewsObjectSuite extends EnhancedViewsSuite {
   def doSetChildrenEnabled(radioGroup: RadioGroup, enabled: scala.Boolean) {
     radioGroup.setChildrenEnabled(enabled)
   }
+
+  def doOnSeekBarEvent(
+    seekBar: SeekBar,
+    f: PartialFunction[SeekBarEvent, Unit]
+  ) {
+    seekBar onSeekBarEvent f
+  }
 }
 
 /** Tests the EnhancedViews trait.
@@ -136,5 +188,12 @@ class EnhancedViewsTraitSuite extends EnhancedViewsSuite with EnhancedViews {
 
   def doSetChildrenEnabled(radioGroup: RadioGroup, enabled: scala.Boolean) {
     radioGroup.setChildrenEnabled(enabled)
+  }
+
+  def doOnSeekBarEvent(
+    seekBar: SeekBar,
+    f: PartialFunction[SeekBarEvent, Unit]
+  ) {
+    seekBar onSeekBarEvent f
   }
 }
