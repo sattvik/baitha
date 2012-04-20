@@ -25,8 +25,6 @@ import com.sattvik.baitha.views._
   *
   * @author Daniel Solano Gómez */
 trait EnhancedViews {
-  import EnhancedViews._
-
   implicit def enhanceView(view: View): EnhancedView = {
     new EnhancedView(view)
   }

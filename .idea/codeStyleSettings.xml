@@ -55,6 +55,7 @@
         <option name="WHILE_BRACE_FORCE" value="3" />
         <ScalaCodeStyleSettings>
           <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="3" />
+          <option name="ADD_FULL_QUALIFIED_IMPORTS" value="true" />
           <option name="WRAP_BEFORE_WITH_KEYWORD" value="true" />
           <option name="METHOD_BRACE_FORCE" value="1" />
           <option name="PLACE_CLOSURE_PARAMETERS_ON_NEW_LINE" value="false" />
