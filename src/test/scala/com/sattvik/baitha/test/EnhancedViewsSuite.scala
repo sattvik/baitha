@@ -20,7 +20,7 @@ import scala.collection.mutable.ListBuffer
 import android.view.View
 import android.widget._
 import com.sattvik.baitha.EnhancedViews
-import com.sattvik.baitha.EnhancedViews._
+import com.sattvik.baitha.views._
 import org.mockito.ArgumentCaptor
 import org.scalatest.{Suite, OneInstancePerTest}
 import org.scalatest.matchers.ShouldMatchers
