@@ -65,6 +65,26 @@ sealed trait ThreadUtils {
       case _: RejectedExecutionException => None
     }
   }
+
+  /** Runs the block of code off the UI thread as a future.  Use this when
+    * you are interested in the result of the block.
+    *
+    * @param block a block of code to execute in a background thread
+    *
+    * @tparam T the type of value the block returns
+    *
+    * @return an option containing a future representing pending completion of
+    *         the task.  If empty, this means the task failed to be scheduled.
+    */
+  protected final def asFuture[T](block: => T): Option[Future[T]] = {
+    try {
+      executorService.map(_.submit(new Callable[T] {
+        def call() = block
+      }))
+    } catch {
+      case _: RejectedExecutionException => None
+    }
+  }
 }
 
 /** An implementation of ThreadUtils designed to be mixed into an Activity.
