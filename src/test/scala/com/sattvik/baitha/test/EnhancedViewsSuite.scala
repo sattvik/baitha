@@ -34,10 +34,10 @@ import org.mockito.Mockito.{verify, when}
   * @author Daniel Solano Gómez */
 abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest with
                                           MockitoSugar with ShouldMatchers {
-  private val mockedView = mock[View]
-
   /** Tests that views can have an enhanced onClick method. */
   final def testOnClick() {
+    val mockedView = mock[View]
+
     doOnClick(mockedView)
 
     verify(mockedView).setOnClickListener(any(classOf[View.OnClickListener]))
@@ -138,6 +138,18 @@ abstract class EnhancedViewsSuite extends Suite with OneInstancePerTest with
 
   /** Actually sets the event listener. */
   def doOnSeekBarEvent(seekBar: SeekBar, f: PartialFunction[SeekBarEvent, Unit])
+
+  /** Tests that compound buttons can have an enhanced onCheckChange method. */
+  final def testOnCheckChange() {
+    val button = mock[CompoundButton]
+
+    doOnCheckChange(button)
+
+    verify(button).setOnCheckedChangeListener(any(classOf[CompoundButton.OnCheckedChangeListener]))
+  }
+
+  /** Allow each implementation to actually do the onCheckChange */
+  def doOnCheckChange(button: CompoundButton)
 }
 
 /** Tests the EnhancedViews companion object.
@@ -168,6 +180,10 @@ class EnhancedViewsObjectSuite extends EnhancedViewsSuite {
   ) {
     seekBar onSeekBarEvent f
   }
+
+  def doOnCheckChange(button: CompoundButton) {
+    button onCheckChange {(_,_) =>}
+  }
 }
 
 /** Tests the EnhancedViews trait.
@@ -195,5 +211,9 @@ class EnhancedViewsTraitSuite extends EnhancedViewsSuite with EnhancedViews {
     f: PartialFunction[SeekBarEvent, Unit]
   ) {
     seekBar onSeekBarEvent f
+  }
+
+  def doOnCheckChange(button: CompoundButton) {
+    button onCheckChange {(_,_) =>}
   }
 }

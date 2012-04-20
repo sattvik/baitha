@@ -40,6 +40,10 @@ trait EnhancedViews {
   implicit def enhanceSeekBar(v: SeekBar): EnhancedSeekBar = {
     new EnhancedSeekBar(v)
   }
+
+  implicit def enhanceCompoundButtond(v: CompoundButton): EnhancedCompoundButton = {
+    new EnhancedCompoundButton(v)
+  }
 }
 
 /** The companion object to the EnhancedViews trait.  This allows declaration
