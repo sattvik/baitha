@@ -24,7 +24,7 @@ import java.util.concurrent._
   * and background threads.
   *
   * @author Daniel Solano Gómez */
-sealed trait ThreadUtils {
+trait ThreadUtils {
   /** An Android handler to post things onto the UI thread. */
   protected def handler: Option[Handler]
   /** A Java executor service to manage background tasks. */
