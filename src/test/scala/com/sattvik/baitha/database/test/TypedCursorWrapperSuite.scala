@@ -58,15 +58,15 @@ class TypedCursorWrapperSuite
   val cursor = new TypedCursorWrapper(mockCursor) with HoneycombSdkVersions
 
   def testGetColumnIndex() {
-    expect(ColumnIndex)(cursor.getColumnIndex(TypedColumn[Int](Column)))
+    expectResult(ColumnIndex)(cursor.getColumnIndex(TypedColumn[Int](Column)))
   }
 
   def testGetColumnIndexOrThrow() {
-    expect(ColumnIndex)(cursor.getColumnIndexOrThrow(TypedColumn[Int](Column)))
+    expectResult(ColumnIndex)(cursor.getColumnIndexOrThrow(TypedColumn[Int](Column)))
   }
 
   def testGetColumnIndexMissing() {
-    expect(-1)(cursor.getColumnIndex(TypedColumn[Int](MissingColumn)))
+    expectResult(-1)(cursor.getColumnIndex(TypedColumn[Int](MissingColumn)))
   }
 
   def testGetColumnIndexOrThrowMissing() {
@@ -76,123 +76,123 @@ class TypedCursorWrapperSuite
   }
 
   def testIsNull() {
-    expect(false)(cursor.isNull(TypedColumn[Int](Column)))
+    expectResult(false)(cursor.isNull(TypedColumn[Int](Column)))
   }
 
   def testIsNullWhenNull() {
-    expect(true)(cursor.isNull(TypedColumn[Int](NullColumn)))
+    expectResult(true)(cursor.isNull(TypedColumn[Int](NullColumn)))
   }
 
   def testGetBlob() {
-    expect(BlobData) {
+    expectResult(BlobData) {
       cursor.get(TypedColumn[Array[Byte]](Column))
     }
   }
 
   def testGetOptionBlob() {
-    expect(Some(BlobData)) {
+    expectResult(Some(BlobData)) {
       cursor.getOption(TypedColumn[Array[Byte]](Column))
     }
   }
 
   def testGetOptionNullBlob() {
-    expect(None) {
+    expectResult(None) {
       cursor.getOption(TypedColumn[Array[Byte]](NullColumn))
     }
   }
 
   def testGetOrThrowBlob() {
-    expect(BlobData) {
+    expectResult(BlobData) {
       cursor.getOrThrow(TypedColumn[Array[Byte]](Column))
     }
   }
 
   def testGetOrThrowOptionBlob() {
-    expect(Some(BlobData)) {
+    expectResult(Some(BlobData)) {
       cursor.getOrThrowOption(TypedColumn[Array[Byte]](Column))
     }
   }
 
   def testGetOrThrowOptionNullBlob() {
-    expect(None) {
+    expectResult(None) {
       cursor.getOrThrowOption(TypedColumn[Array[Byte]](NullColumn))
     }
   }
 
   def testGetDouble() {
-    expect(DoubleData) {
+    expectResult(DoubleData) {
       cursor.get(TypedColumn[Double](Column))
     }
   }
 
   def testGetOrThrowDouble() {
-    expect(DoubleData) {
+    expectResult(DoubleData) {
       cursor.getOrThrow(TypedColumn[Double](Column))
     }
   }
 
   def testGetFloat() {
-    expect(FloatData) {
+    expectResult(FloatData) {
       cursor.get(TypedColumn[Float](Column))
     }
   }
 
   def testGetOrThrowFloat() {
-    expect(FloatData) {
+    expectResult(FloatData) {
       cursor.getOrThrow(TypedColumn[Float](Column))
     }
   }
 
   def testGetInt() {
-    expect(IntData) {
+    expectResult(IntData) {
       cursor.get(TypedColumn[Int](Column))
     }
   }
 
   def testGetOrThrowInt() {
-    expect(IntData) {
+    expectResult(IntData) {
       cursor.getOrThrow(TypedColumn[Int](Column))
     }
   }
 
   def testGetLong() {
-    expect(LongData) {
+    expectResult(LongData) {
       cursor.get(TypedColumn[Long](Column))
     }
   }
 
   def testGetOrThrowLong() {
-    expect(LongData) {
+    expectResult(LongData) {
       cursor.getOrThrow(TypedColumn[Long](Column))
     }
   }
 
   def testGetShort() {
-    expect(ShortData) {
+    expectResult(ShortData) {
       cursor.get(TypedColumn[Short](Column))
     }
   }
 
   def testGetOrThrowShort() {
-    expect(ShortData) {
+    expectResult(ShortData) {
       cursor.getOrThrow(TypedColumn[Short](Column))
     }
   }
 
   def testGetString() {
-    expect(StringData) {
+    expectResult(StringData) {
       cursor.get(TypedColumn[String](Column))
     }
   }
 
   def testGetOrThrowString() {
-    expect(StringData) {
+    expectResult(StringData) {
       cursor.getOrThrow(TypedColumn[String](Column))
     }
   }
 
   def testGetMissingColumn() {
-    expect(null) {
+    expectResult(null) {
       cursor.get(TypedColumn[String](MissingColumn))
     }
   }
@@ -233,7 +233,7 @@ class TypedCursorWrapperSuite
     verify(mockCursor).deactivate()
   }
 
-  def testGetBlobIndex() {expect(BlobData)(cursor.getBlob(ColumnIndex))}
+  def testGetBlobIndex() {expectResult(BlobData)(cursor.getBlob(ColumnIndex))}
 
   def testGetColumnCount() {
     cursor.getColumnCount
@@ -255,27 +255,27 @@ class TypedCursorWrapperSuite
     verify(mockCursor).getCount
   }
 
-  def testGetDoubleIndex() {expect(DoubleData)(cursor.getDouble(ColumnIndex))}
+  def testGetDoubleIndex() {expectResult(DoubleData)(cursor.getDouble(ColumnIndex))}
 
   def testGetExtras() {
     cursor.getExtras
     verify(mockCursor).getExtras
   }
 
-  def testGetFloatIndex() {expect(FloatData)(cursor.getFloat(ColumnIndex))}
+  def testGetFloatIndex() {expectResult(FloatData)(cursor.getFloat(ColumnIndex))}
 
-  def testGetIntIndex() {expect(IntData)(cursor.getInt(ColumnIndex))}
+  def testGetIntIndex() {expectResult(IntData)(cursor.getInt(ColumnIndex))}
 
-  def testGetLongIndex() {expect(LongData)(cursor.getLong(ColumnIndex))}
+  def testGetLongIndex() {expectResult(LongData)(cursor.getLong(ColumnIndex))}
 
   def testGetPosition() {
     cursor.getPosition
     verify(mockCursor).getPosition
   }
 
-  def testGetShortIndex() {expect(ShortData)(cursor.getShort(ColumnIndex))}
+  def testGetShortIndex() {expectResult(ShortData)(cursor.getShort(ColumnIndex))}
 
-  def testGetStringIndex() {expect(ShortData)(cursor.getShort(ColumnIndex))}
+  def testGetStringIndex() {expectResult(ShortData)(cursor.getShort(ColumnIndex))}
 
   def testGetTypePreHoneycomb() {
     intercept[UnsupportedOperationException] {

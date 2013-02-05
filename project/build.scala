@@ -26,18 +26,13 @@ object BaithaBuild extends Build {
     file("."),
     settings = BaithaDefaults.settings ++ Seq (
       name := "baitha",
-      libraryDependencies <+= scalaVersion(scalatestDependency(_)),
-      libraryDependencies += "org.mockito" % "mockito-core" % "1.9.5" % "test",
+      libraryDependencies ++= Seq (
+        "org.mockito" % "mockito-core" % "1.9.5" % "test",
+        "org.scalatest" %% "scalatest" % "1.9.1" % "test"
+      ),
       crossScalaVersions := Seq(
-        "2.8.1", "2.8.2", "2.9.0", "2.9.0-1", "2.9.1", "2.9.1-1", "2.9.2", "2.10.0"
+        "2.9.0", "2.9.0-1", "2.9.1", "2.9.1-1", "2.9.2", "2.10.0"
       )
     )
   )
-
-  def scalatestDependency(scalaVersion: String) = scalaVersion match {
-    case "2.10.0" => "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
-    case "2.8.1"  => "org.scalatest" %% "scalatest" % "1.8" % "test"
-    case "2.8.2"  => "org.scalatest" %% "scalatest" % "1.8" % "test"
-    case _ => "org.scalatest" %% "scalatest" % "1.9.1" % "test"
-  }
 }
