@@ -49,7 +49,7 @@ class Query[A] private(
 
   /** Returns a version of the query that retrieves the given columns. */
   def withColumns(columns: Traversable[_]): Query[A] = {
-    val columnArray = Some(columns map {_.toString} toArray)
+    val columnArray = Some(columns map {a: Any => a.toString} toArray)
     new Query(source, columnArray, where, whereArgs, sort)
   }
 
