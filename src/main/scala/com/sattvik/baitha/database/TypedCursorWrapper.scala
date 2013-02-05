@@ -16,6 +16,7 @@
  */
 package com.sattvik.baitha.database
 
+import Predef.{augmentString => _, wrapString => _, _}
 import android.content.ContentResolver
 import android.database._
 import android.net.Uri
@@ -169,7 +170,9 @@ class TypedCursorWrapper(protected[this] val cursor: Cursor) extends Cursor {
       TypedCursorWrapper.Getters(manifest)(cursor, index).asInstanceOf[A]
     } catch {
       case _: NoSuchElementException => throw new IllegalArgumentException(
-        "'%s' is not a supported TypedColumn type".format(manifest))
+        String.format(
+          "'%s' is not a supported TypedColumn type",
+          manifest))
     }
   }
 

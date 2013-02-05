@@ -16,6 +16,7 @@
  */
 package com.sattvik.baitha
 
+import Predef.{augmentString => _, wrapString => _, _}
 import android.content.SharedPreferences
 import android.content.SharedPreferences.Editor
 
@@ -36,7 +37,9 @@ object TypedPreference {
     val option = factory map {_(key).asInstanceOf[TypedPreference[A]]}
     option.getOrElse {
       throw new IllegalArgumentException(
-        "'%s' is not a natively supported preference type".format(manifest[A]))
+        String.format(
+          "'%s' is not a natively supported preference type",
+          manifest[A]))
     }
   }
 

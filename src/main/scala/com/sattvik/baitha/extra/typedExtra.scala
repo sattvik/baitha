@@ -269,7 +269,9 @@ object CharSequenceArrayListExtra {
 private[extra] object PreFroYoUnsupportedExtra {
   def apply[A: Manifest](name: String): TypedExtra[A] = {
     throw new UnsupportedOperationException(
-      "%s extras are not available before API level 8".format(manifest[A]))
+      String.format(
+        "%s extras are not available before API level 8",
+        manifest[A]))
   }
 }
 

@@ -16,6 +16,7 @@
  */
 package com.sattvik.baitha
 
+import Predef.{wrapString => _, augmentString => _, _}
 import android.util.Log
 
 import Logger.{LogPrinter, LogConfig}
@@ -210,7 +211,23 @@ trait Logger {this: LogConfig with LogPrinter =>
     * similar to String.format(message, args). */
   private def messageString(message: AnyRef, args: Seq[Any]) = {
     val messageStr = if (message == null) "null" else message.toString
-    if (args.isEmpty) messageStr else messageStr.format(args: _*)
+    if (args.isEmpty) {
+      messageStr
+    } else {
+      val argArray: Seq[AnyRef] = args map { arg: Any =>
+        arg match {
+          case r: AnyRef => r
+          case d: Double => java.lang.Double.valueOf(d)
+          case f: Float => java.lang.Float.valueOf(f)
+          case l: Long => java.lang.Long.valueOf(l)
+          case i: Int => java.lang.Integer.valueOf(i)
+          case c: Char => java.lang.Character.valueOf(c)
+          case s: Short => java.lang.Short.valueOf(s)
+          case b: Boolean => java.lang.Boolean.valueOf(b)
+        }
+      }
+      String.format(message.toString, argArray: _*)
+    }
   }
 
   /** Logs an exception with a message if the given log level is loggable. */

@@ -146,7 +146,7 @@ class EnhancedIntentSuite
     val ex = intercept[IllegalArgumentException] {
       intent.putExtras(Map("Foo" -> new ArrayList[CharSequence]))
     }
-    expect(true)(ex.getMessage.contains("erasure"))
+    expectResult(true)(ex.getMessage.contains("erasure"))
   }
 
   def testPutExtrasDouble() {
@@ -198,7 +198,7 @@ class EnhancedIntentSuite
     val ex = intercept[IllegalArgumentException] {
       intent.putExtras(Map("Foo" -> new ArrayList[java.lang.Integer]))
     }
-    expect(true)(ex.getMessage.contains("erasure"))
+    expectResult(true)(ex.getMessage.contains("erasure"))
   }
 
   def testPutExtrasLong() {
@@ -238,7 +238,7 @@ class EnhancedIntentSuite
     val ex = intercept[IllegalArgumentException] {
       intent.putExtras(Map("Foo" -> new ArrayList[Parcelable]))
     }
-    expect(true)(ex.getMessage.contains("erasure"))
+    expectResult(true)(ex.getMessage.contains("erasure"))
   }
 
   def testPutExtrasSerializable() {
@@ -284,7 +284,7 @@ class EnhancedIntentSuite
     val ex = intercept[IllegalArgumentException] {
       intent.putExtras(Map("Foo" -> new ArrayList[String]))
     }
-    expect(true)(ex.getMessage.contains("erasure"))
+    expectResult(true)(ex.getMessage.contains("erasure"))
   }
 
   def testPutExtrasUnsupportedArrayList() {
@@ -294,21 +294,21 @@ class EnhancedIntentSuite
       }
       intent.putExtras(Map("Foo" -> value))
     }
-    expect(true)(ex.getMessage.contains("type parameter"))
+    expectResult(true)(ex.getMessage.contains("type parameter"))
   }
 
   def testPutExtrasUnsupportedArrayListEmpty() {
     val ex = intercept[IllegalArgumentException] {
       intent.putExtras(Map("Foo" -> new ArrayList[Option[_]]))
     }
-    expect(true)(ex.getMessage.contains("erasure"))
+    expectResult(true)(ex.getMessage.contains("erasure"))
   }
 
   def testPutExtrasUnsupportedType() {
     val ex = intercept[IllegalArgumentException] {
       intent.putExtras(Map("Foo" -> new Object))
     }
-    expect(true)(ex.getMessage.contains("invalid type"))
+    expectResult(true)(ex.getMessage.contains("invalid type"))
   }
 
   /** Checks that an exception with the proper type and message is thrown for
@@ -358,31 +358,31 @@ abstract class AbstractTypedExtraSuite[A]
   /** Tests that `EnhancedIntent.hasExtra(TypedExtra[A])` works when the
     * extra is present. */
   def testHasExtra() {
-    expect(true)(intent.hasExtra(extra))
+    expectResult(true)(intent.hasExtra(extra))
   }
 
   /** Tests that `EnhancedIntent.hasExtra(TypedExtra[A])` works when the
     * extra is missing. */
   def testHasExtraMissing() {
-    expect(false)(intent.hasExtra(missingExtra))
+    expectResult(false)(intent.hasExtra(missingExtra))
   }
 
   /** Tests that `EnhancedIntent.getExtra(TypedExtra[A])` works when the
     * extra is present. */
   def testGetExtra() {
-    expect(value)(intent.getExtra(extra))
+    expectResult(value)(intent.getExtra(extra))
   }
 
   /** Tests that `EnhancedIntent.getExtraOption(TypedExtra[A])` works when the
     * extra is present. */
   def testGetExtraOption() {
-    expect(Some(value))(intent.getExtraOption(extra))
+    expectResult(Some(value))(intent.getExtraOption(extra))
   }
 
   /** Tests that `EnhancedIntent.getExtraOption(TypedExtra[A])` works when the
     * extra is missing. */
   def testGetExtraOptionMissing() {
-    expect(None)(intent.getExtraOption(missingExtra))
+    expectResult(None)(intent.getExtraOption(missingExtra))
   }
 
   /** Tests that `EnhancedIntent.putExtra(TypedExtra[A], A)` works. */
@@ -426,13 +426,13 @@ abstract class AbstractTypedExtraSuite[A]
 
   /** Tests direct use of the extractor in a `TypedExtra`. */
   def testExtractor() {
-    expect(Some(value))(extra.unapply(intent))
+    expectResult(Some(value))(extra.unapply(intent))
   }
 
   /** Tests use of the extractor in a `TypedExtra` using an intent for
     * matching. */
   def testExtractorMatch() {
-    expect(value) {
+    expectResult(value) {
       intent match {
         case extra(v) => v
       }
@@ -442,7 +442,7 @@ abstract class AbstractTypedExtraSuite[A]
   /** Tests direct use of the extractor in a `TypedExtra` when the extra is
     * missing. */
   def testExtractorMissing() {
-    expect(None)(missingExtra.unapply(intent))
+    expectResult(None)(missingExtra.unapply(intent))
   }
 }
 
