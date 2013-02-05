@@ -3,8 +3,7 @@
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
     <excludeFromCompile>
-      <directory url="file://$PROJECT_DIR$/target/scala-2.9.1-1/src_managed/main/java" includeSubdirectories="true" />
-      <directory url="file://$PROJECT_DIR$/target/scala-2.9.2/src_managed/main/java" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/target/scala-2.10/src_managed/main/java" includeSubdirectories="true" />
     </excludeFromCompile>
     <resourceExtensions />
     <wildcardResourcePatterns>
@@ -19,7 +18,11 @@
       <entry name="?*.tld" />
       <entry name="?*.ftl" />
     </wildcardResourcePatterns>
-    <annotationProcessing enabled="false" useClasspath="true" />
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+    </annotationProcessing>
   </component>
 </project>
 
