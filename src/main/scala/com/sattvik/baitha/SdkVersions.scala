@@ -69,7 +69,7 @@ object SdkVersions extends Enumeration with SdkVersions {
     try {
       super.apply(version)
     } catch {
-      case _ => Value(version, "Unknown")
+      case _: Throwable => Value(version, "Unknown")
     }
   }
 
