@@ -16,6 +16,7 @@
  */
 package com.sattvik.baitha
 
+import Predef.{augmentString => _, wrapString => _, _}
 import java.io.Serializable
 import java.util.ArrayList
 import android.content.Intent
@@ -218,7 +219,7 @@ class EnhancedIntent(intent: Intent) {
           // Serializable is the least-preferred match
           case v: Serializable => intent.putExtra(name, v)
           case v               => throw new IllegalArgumentException(
-            "%s has an invalid type for an extra".format(v))
+            String.format("%s has an invalid type for an extra", v.toString))
         }
     }
     this
