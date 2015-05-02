@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: com.google.android:support-v4:r7:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.google.android/support-v4/jars/support-v4-r7.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.google.android/support-v4/docs/support-v4-r7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/com.google.android/support-v4/srcs/support-v4-r7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

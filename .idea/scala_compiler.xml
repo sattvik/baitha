@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ScalacSettings">
-    <option name="COMPILER_LIBRARY_NAME" value="scala-2.9.1-1" />
-    <option name="COMPILER_LIBRARY_LEVEL" value="Project" />
+  <component name="ScalaCompilerConfiguration">
+    <profile name="SBT 1" modules="baitha">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="optimiseBytecode" value="true" />
+    </profile>
   </component>
 </project>
-

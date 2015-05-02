@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: org.khronos:opengl-api:gl1.1-android-2.1_r1:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.khronos/opengl-api/jars/opengl-api-gl1.1-android-2.1_r1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.khronos/opengl-api/docs/opengl-api-gl1.1-android-2.1_r1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.khronos/opengl-api/srcs/opengl-api-gl1.1-android-2.1_r1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

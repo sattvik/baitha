@@ -56,7 +56,6 @@
         <ScalaCodeStyleSettings>
           <option name="WRAP_BEFORE_WITH_KEYWORD" value="true" />
           <option name="METHOD_BRACE_FORCE" value="1" />
-          <option name="PLACE_CLOSURE_PARAMETERS_ON_NEW_LINE" value="false" />
           <option name="PLACE_SELF_TYPE_ON_NEW_LINE" value="false" />
           <option name="ALIGN_IF_ELSE" value="true" />
           <option name="NOT_CONTINUATION_INDENT_FOR_PARAMS" value="true" />
@@ -95,9 +94,7 @@
           <option name="METHOD_CALL_CHAIN_WRAP" value="5" />
           <option name="BINARY_OPERATION_WRAP" value="1" />
           <option name="KEEP_SIMPLE_BLOCKS_IN_ONE_LINE" value="true" />
-          <option name="KEEP_SIMPLE_METHODS_IN_ONE_LINE" value="true" />
           <option name="FOR_STATEMENT_WRAP" value="5" />
-          <option name="DOWHILE_BRACE_FORCE" value="3" />
           <option name="WHILE_BRACE_FORCE" value="3" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
@@ -168,4 +165,3 @@
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
   </component>
 </project>
-

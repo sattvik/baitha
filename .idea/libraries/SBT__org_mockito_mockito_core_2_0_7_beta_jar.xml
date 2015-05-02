@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="SBT: org.mockito:mockito-core:2.0.7-beta:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mockito/mockito-core/jars/mockito-core-2.0.7-beta.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mockito/mockito-core/docs/mockito-core-2.0.7-beta-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/cache/org.mockito/mockito-core/srcs/mockito-core-2.0.7-beta-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
