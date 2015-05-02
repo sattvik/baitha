@@ -63,19 +63,14 @@ resolvers += "Baitha snapshots" at "http://sattvik.github.com/baitha/snapshots"
 Next, you will need to add the dependency, using something like:
 
 ------------------------------------------------------------------------------
-libraryDependencies += "com.sattvik" %% "baitha" % "0.1.0-SNAPSHOT",
+0ibraryDependencies += "com.sattvik" %% "baitha" % "0.1.1-SNAPSHOT",
 ------------------------------------------------------------------------------
 
 === Binary compatibility
 
 Baitha is currently tested and cross-compiled with the following Scala versions:
 
-* 2.8.1
-* 2.8.2
-* 2.9.0
-* 2.9.0-1
-* 2.9.1
-* 2.9.1-1
+* 2.10.5
 
 == Contributing
 
