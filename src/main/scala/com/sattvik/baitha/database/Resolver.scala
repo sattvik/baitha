@@ -17,10 +17,9 @@
 
 package com.sattvik.baitha.database
 
-import android.content.Context
+import android.content.{Context, CursorLoader}
 import android.database.Cursor
 import android.net.Uri
-import android.support.v4.content.CursorLoader
 
 /** A resolver is capable of actually executing queries.
   *
