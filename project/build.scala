@@ -14,7 +14,8 @@ object BaithtaBuild extends Build {
     scalacOptions ++= Seq (
       Opts.compile.deprecation,
       Opts.compile.unchecked,
-      Opts.compile.optimise
+      Opts.compile.optimise,
+      "-feature"
     )
   )
 
