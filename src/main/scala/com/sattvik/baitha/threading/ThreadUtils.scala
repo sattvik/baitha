@@ -19,6 +19,7 @@ package com.sattvik.baitha.threading
 import android.app.Activity
 import android.os._
 import java.util.concurrent._
+import scala.language.implicitConversions
 
 /** Adds a number of utility functions to facilitate interaction between UI
   * and background threads.

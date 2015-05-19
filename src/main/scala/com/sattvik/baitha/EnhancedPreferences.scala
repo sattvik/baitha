@@ -19,6 +19,7 @@ package com.sattvik.baitha
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import com.sattvik.baitha.EnhancedPreferences.EnhancedEditor
+import scala.language.implicitConversions
 
 /** Provides additional functionality to Android's SharedPreferences to make
   * working with Android preferences easier and more fun.

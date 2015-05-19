@@ -21,8 +21,8 @@ import android.content.ContentResolver
 import android.database._
 import android.net.Uri
 import android.os.Bundle
-
 import com.sattvik.baitha.SdkVersions
+import scala.language.implicitConversions
 
 import TypedCursorWrapper.HoneycombGetType
 import TypedCursorWrapper.PreHoneycombGetType
@@ -196,6 +196,7 @@ class TypedCursorWrapper(protected[this] val cursor: Cursor) extends Cursor {
     cursor.copyStringToBuffer(columnIndex, buffer)
   }
 
+  @deprecated("Since requery() is deprecated, so too is this.", "0.1.1")
   def deactivate() {cursor.deactivate()}
 
   def getBlob(columnIndex: Int) = cursor.getBlob(columnIndex)
@@ -276,7 +277,7 @@ class TypedCursorWrapper(protected[this] val cursor: Cursor) extends Cursor {
   @deprecated(
     "Don't use this. Just request a new cursor, so you can do this " +
         "asynchronously and update your list view once the new cursor comes " +
-        "back.")
+        "back.", "0.1.0")
   def requery() = cursor.requery()
 
   def respond(bundle: Bundle) = cursor.respond(bundle)

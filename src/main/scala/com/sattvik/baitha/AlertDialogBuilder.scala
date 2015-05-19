@@ -25,6 +25,7 @@ import android.view.View
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ListAdapter
 import com.sattvik.baitha.AlertDialogBuilder.{DialogueFunctor, BuilderFactory}
+import scala.language.implicitConversions
 
 /** Builds or shows an alert dialogue from the arguments passed in to the
   * constructor.  Too how to use the builder, refer to the documentation for

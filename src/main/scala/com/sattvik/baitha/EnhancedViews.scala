@@ -19,6 +19,7 @@ package com.sattvik.baitha
 import android.view.View
 import android.widget._
 import com.sattvik.baitha.views._
+import scala.language.implicitConversions
 
 /** The EnhancedViews trait adds an implicit conversion that makes working with
   * Views a bit easier.

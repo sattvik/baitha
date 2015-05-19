@@ -21,6 +21,7 @@ import java.io.Serializable
 import java.util.ArrayList
 import android.content.Intent
 import android.os.{Parcelable, Bundle}
+import scala.language.implicitConversions
 
 import extra._
 
