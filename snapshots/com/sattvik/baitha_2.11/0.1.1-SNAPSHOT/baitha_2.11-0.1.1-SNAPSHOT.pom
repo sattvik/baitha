@@ -2,7 +2,7 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sattvik</groupId>
-    <artifactId>baitha_2.10</artifactId>
+    <artifactId>baitha_2.11</artifactId>
     <packaging>jar</packaging>
     <description>baitha</description>
     <version>0.1.1-SNAPSHOT</version>
@@ -14,7 +14,7 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.10.5</version>
+            <version>2.11.6</version>
         </dependency>
         <dependency>
             <groupId>com.google.android</groupId>
@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.10</artifactId>
+            <artifactId>scalatest_2.11</artifactId>
             <version>2.2.4</version>
             <scope>test</scope>
             <exclusions>
