@@ -30,10 +30,10 @@ class SdkVersionsSuite extends Suite {
       override lazy val currentSdkVersion = Gingerbread
     }
 
-    expectResult(true) {
+    assertResult(true) {
       SdkVersions.values.filter(_ > Gingerbread).forall(test currentSdkBefore _)
     }
-    expectResult(true) {
+    assertResult(true) {
       SdkVersions.values.filterNot(_ > Gingerbread).forall(!test.currentSdkBefore(_))
     }
   }
@@ -43,17 +43,17 @@ class SdkVersionsSuite extends Suite {
       override lazy val currentSdkVersion = EclairMR1
     }
 
-    expectResult(true) {
+    assertResult(true) {
       SdkVersions.values.filter(_ <= EclairMR1).forall(eclair.currentSdkSince(_))
     }
-    expectResult(true) {
+    assertResult(true) {
       SdkVersions.values.filterNot(_ <= EclairMR1).forall(!eclair.currentSdkSince(_))
     }
   }
 
   def testObject() {
-    expectResult(true)(currentSdkBefore(Donut))
-    expectResult(true)(currentSdkSince(NoVersion))
+    assertResult(true)(currentSdkBefore(Donut))
+    assertResult(true)(currentSdkSince(NoVersion))
   }
 
   /** Tests gracefully handling an unfamiliar API version. */
@@ -61,7 +61,7 @@ class SdkVersionsSuite extends Suite {
     val unknown = new SdkVersions {
       override lazy val currentSdkVersion = SdkVersions.fromApiLevel(42)
     }
-    expectResult(true)(unknown.currentSdkBefore(CurrentDevelopment))
-    expectResult(true)(unknown.currentSdkSince(Donut))
+    assertResult(true)(unknown.currentSdkBefore(CurrentDevelopment))
+    assertResult(true)(unknown.currentSdkSince(Donut))
   }
 }

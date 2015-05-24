@@ -58,15 +58,15 @@ class TypedCursorWrapperSuite
   val cursor = new TypedCursorWrapper(mockCursor) with HoneycombSdkVersions
 
   def testGetColumnIndex() {
-    expectResult(ColumnIndex)(cursor.getColumnIndex(TypedColumn[Int](Column)))
+    assertResult(ColumnIndex)(cursor.getColumnIndex(TypedColumn[Int](Column)))
   }
 
   def testGetColumnIndexOrThrow() {
-    expectResult(ColumnIndex)(cursor.getColumnIndexOrThrow(TypedColumn[Int](Column)))
+    assertResult(ColumnIndex)(cursor.getColumnIndexOrThrow(TypedColumn[Int](Column)))
   }
 
   def testGetColumnIndexMissing() {
-    expectResult(-1)(cursor.getColumnIndex(TypedColumn[Int](MissingColumn)))
+    assertResult(-1)(cursor.getColumnIndex(TypedColumn[Int](MissingColumn)))
   }
 
   def testGetColumnIndexOrThrowMissing() {
@@ -76,123 +76,123 @@ class TypedCursorWrapperSuite
   }
 
   def testIsNull() {
-    expectResult(false)(cursor.isNull(TypedColumn[Int](Column)))
+    assertResult(false)(cursor.isNull(TypedColumn[Int](Column)))
   }
 
   def testIsNullWhenNull() {
-    expectResult(true)(cursor.isNull(TypedColumn[Int](NullColumn)))
+    assertResult(true)(cursor.isNull(TypedColumn[Int](NullColumn)))
   }
 
   def testGetBlob() {
-    expectResult(BlobData) {
+    assertResult(BlobData) {
       cursor.get(TypedColumn[Array[Byte]](Column))
     }
   }
 
   def testGetOptionBlob() {
-    expectResult(Some(BlobData)) {
+    assertResult(Some(BlobData)) {
       cursor.getOption(TypedColumn[Array[Byte]](Column))
     }
   }
 
   def testGetOptionNullBlob() {
-    expectResult(None) {
+    assertResult(None) {
       cursor.getOption(TypedColumn[Array[Byte]](NullColumn))
     }
   }
 
   def testGetOrThrowBlob() {
-    expectResult(BlobData) {
+    assertResult(BlobData) {
       cursor.getOrThrow(TypedColumn[Array[Byte]](Column))
     }
   }
 
   def testGetOrThrowOptionBlob() {
-    expectResult(Some(BlobData)) {
+    assertResult(Some(BlobData)) {
       cursor.getOrThrowOption(TypedColumn[Array[Byte]](Column))
     }
   }
 
   def testGetOrThrowOptionNullBlob() {
-    expectResult(None) {
+    assertResult(None) {
       cursor.getOrThrowOption(TypedColumn[Array[Byte]](NullColumn))
     }
   }
 
   def testGetDouble() {
-    expectResult(DoubleData) {
+    assertResult(DoubleData) {
       cursor.get(TypedColumn[Double](Column))
     }
   }
 
   def testGetOrThrowDouble() {
-    expectResult(DoubleData) {
+    assertResult(DoubleData) {
       cursor.getOrThrow(TypedColumn[Double](Column))
     }
   }
 
   def testGetFloat() {
-    expectResult(FloatData) {
+    assertResult(FloatData) {
       cursor.get(TypedColumn[Float](Column))
     }
   }
 
   def testGetOrThrowFloat() {
-    expectResult(FloatData) {
+    assertResult(FloatData) {
       cursor.getOrThrow(TypedColumn[Float](Column))
     }
   }
 
   def testGetInt() {
-    expectResult(IntData) {
+    assertResult(IntData) {
       cursor.get(TypedColumn[Int](Column))
     }
   }
 
   def testGetOrThrowInt() {
-    expectResult(IntData) {
+    assertResult(IntData) {
       cursor.getOrThrow(TypedColumn[Int](Column))
     }
   }
 
   def testGetLong() {
-    expectResult(LongData) {
+    assertResult(LongData) {
       cursor.get(TypedColumn[Long](Column))
     }
   }
 
   def testGetOrThrowLong() {
-    expectResult(LongData) {
+    assertResult(LongData) {
       cursor.getOrThrow(TypedColumn[Long](Column))
     }
   }
 
   def testGetShort() {
-    expectResult(ShortData) {
+    assertResult(ShortData) {
       cursor.get(TypedColumn[Short](Column))
     }
   }
 
   def testGetOrThrowShort() {
-    expectResult(ShortData) {
+    assertResult(ShortData) {
       cursor.getOrThrow(TypedColumn[Short](Column))
     }
   }
 
   def testGetString() {
-    expectResult(StringData) {
+    assertResult(StringData) {
       cursor.get(TypedColumn[String](Column))
     }
   }
 
   def testGetOrThrowString() {
-    expectResult(StringData) {
+    assertResult(StringData) {
       cursor.getOrThrow(TypedColumn[String](Column))
     }
   }
 
   def testGetMissingColumn() {
-    expectResult(null) {
+    assertResult(null) {
       cursor.get(TypedColumn[String](MissingColumn))
     }
   }
@@ -228,12 +228,13 @@ class TypedCursorWrapperSuite
     verify(mockCursor).copyStringToBuffer(1, buffer)
   }
 
+  @deprecated("Tests a deprecated method", "0.1.1")
   def testDeactivate() {
     cursor.deactivate()
     verify(mockCursor).deactivate()
   }
 
-  def testGetBlobIndex() {expectResult(BlobData)(cursor.getBlob(ColumnIndex))}
+  def testGetBlobIndex() {assertResult(BlobData)(cursor.getBlob(ColumnIndex))}
 
   def testGetColumnCount() {
     cursor.getColumnCount
@@ -255,27 +256,27 @@ class TypedCursorWrapperSuite
     verify(mockCursor).getCount
   }
 
-  def testGetDoubleIndex() {expectResult(DoubleData)(cursor.getDouble(ColumnIndex))}
+  def testGetDoubleIndex() {assertResult(DoubleData)(cursor.getDouble(ColumnIndex))}
 
   def testGetExtras() {
     cursor.getExtras
     verify(mockCursor).getExtras
   }
 
-  def testGetFloatIndex() {expectResult(FloatData)(cursor.getFloat(ColumnIndex))}
+  def testGetFloatIndex() {assertResult(FloatData)(cursor.getFloat(ColumnIndex))}
 
-  def testGetIntIndex() {expectResult(IntData)(cursor.getInt(ColumnIndex))}
+  def testGetIntIndex() {assertResult(IntData)(cursor.getInt(ColumnIndex))}
 
-  def testGetLongIndex() {expectResult(LongData)(cursor.getLong(ColumnIndex))}
+  def testGetLongIndex() {assertResult(LongData)(cursor.getLong(ColumnIndex))}
 
   def testGetPosition() {
     cursor.getPosition
     verify(mockCursor).getPosition
   }
 
-  def testGetShortIndex() {expectResult(ShortData)(cursor.getShort(ColumnIndex))}
+  def testGetShortIndex() {assertResult(ShortData)(cursor.getShort(ColumnIndex))}
 
-  def testGetStringIndex() {expectResult(ShortData)(cursor.getShort(ColumnIndex))}
+  def testGetStringIndex() {assertResult(ShortData)(cursor.getShort(ColumnIndex))}
 
   def testGetTypePreHoneycomb() {
     intercept[UnsupportedOperationException] {
@@ -361,6 +362,7 @@ class TypedCursorWrapperSuite
     verify(mockCursor).registerDataSetObserver(observer)
   }
 
+  @deprecated("Tests a deprecated method", "0.1.1")
   def testRequery() {
     cursor.requery()
     verify(mockCursor).requery()

@@ -71,6 +71,7 @@ Next, you will need to add the dependency, using something like:
 Baitha is currently tested and cross-compiled with the following Scala versions:
 
 * 2.10.5
+* 2.11.6
 
 == Contributing
 

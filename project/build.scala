@@ -5,7 +5,8 @@ object BaithtaBuild extends Build {
   val globalSettings = super.settings ++ Seq(
     name := "Baitha: The Scala/Android Toolkit",
     organization := "com.sattvik",
-    scalaVersion := "2.10.5",
+    scalaVersion := "2.11.6",
+    crossScalaVersions := Seq("2.10.5", "2.11.6"),
     javacOptions ++= Seq(
       "-source", "1.6",
       "-target", "1.6",
@@ -28,8 +29,8 @@ object BaithtaBuild extends Build {
       libraryDependencies ++= Seq (
         "com.google.android" % "android" % "4.1.1.4" % "provided",
         "com.google.android" % "support-v4" % "r7" % "provided",
-        "org.mockito" % "mockito-core" % "2.0.7-beta" % "test",
-        "org.scalatest" %% "scalatest" % "2.2.1" % "test" exclude("org.scala-lang", "scala-reflect")
+        "org.mockito" % "mockito-core" % "2.0.8-beta" % "test",
+        "org.scalatest" %% "scalatest" % "2.2.4" % "test" exclude("org.scala-lang", "scala-reflect")
       )
     )
   )

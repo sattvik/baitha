@@ -428,18 +428,28 @@ object AlertDialogBuilder {
       newButtonFunctor(positiveButton, PositiveButton),
       newButtonFunctor(neutralButton, NeutralButton),
       newButtonFunctor(negativeButton, NegativeButton),
-      { b: AndroidBuilder =>
-        b.setInverseBackgroundForced(forceInverseBackground)
+      new DialogueFunctor {
+        def apply(b: AndroidBuilder) {
+          b.setInverseBackgroundForced(forceInverseBackground)
+        }
       },
-      { (_: AndroidBuilder).setCancelable(cancellable) },
-      { b: AndroidBuilder =>
-        if(onCancel != null) b.setOnCancelListener(onCancel) else b
+      new DialogueFunctor {
+        def apply(b: AndroidBuilder) {
+          b.setCancelable(cancellable)
+        }
       },
-      { b: AndroidBuilder =>
-        if(onItemSelectedListener != null) {
-          b.setOnItemSelectedListener(onItemSelectedListener)
-        } else {
-          b
+      new DialogueFunctor {
+        def apply(b: AndroidBuilder) {
+          if(onCancel != null) {
+            b.setOnCancelListener(onCancel)
+          }
+        }
+      },
+      new DialogueFunctor {
+        def apply(b: AndroidBuilder) {
+          if(onItemSelectedListener != null) {
+            b.setOnItemSelectedListener(onItemSelectedListener)
+          }
         }
       }
     )

@@ -39,7 +39,7 @@ abstract class BuildModeSuite extends Suite with BuildMode {
   * @author Daniel Solano Gómez */
 class ProductionModeSuite extends BuildModeSuite with ProductionMode {
   def testWhenDebug() {
-    expectResult(false)(isDebugEnabled)
+    assertResult(false)(isDebugEnabled)
   }
 }
 
@@ -48,6 +48,6 @@ class ProductionModeSuite extends BuildModeSuite with ProductionMode {
   * @author Daniel Solano Gómez */
 class DebugModeSuite extends BuildModeSuite with DebugMode {
   def testWhenDebug() {
-    expectResult(true)(isDebugEnabled)
+    assertResult(true)(isDebugEnabled)
   }
 }
