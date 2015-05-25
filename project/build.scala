@@ -28,7 +28,6 @@ object BaithtaBuild extends Build {
       version := "0.1.1-SNAPSHOT",
       libraryDependencies ++= Seq (
         "com.google.android" % "android" % "4.1.1.4" % "provided",
-        "com.google.android" % "support-v4" % "r7" % "provided",
         "org.mockito" % "mockito-core" % "2.0.8-beta" % "test",
         "org.scalatest" %% "scalatest" % "2.2.4" % "test" exclude("org.scala-lang", "scala-reflect")
       )
